@@ -13,7 +13,7 @@ Gem::Specification.new do |spec|
   spec.homepage      = ""
   spec.license       = "MIT"
 
-  spec.files = Dir["{app,lib,config}/**/*"] + ["MIT-LICENSE", "Rakefile", "Gemfile", "README.rdoc"]
+  spec.files = Dir["{app,lib,config}/**/*"] + ["Rakefile", "Gemfile", "README.md"]
 
   # spec.files         = `git ls-files -z`.split("\x0")
   # spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
