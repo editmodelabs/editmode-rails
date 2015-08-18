@@ -6,6 +6,10 @@ module Chunks
       new(*args).output
     end
 
+    def initialize(options = {})
+      
+    end
+
     def valid?
       true
     end
@@ -13,11 +17,13 @@ module Chunks
     def output
       
       str = <<-CHUNKS_SCRIPT
-      <script src="https://chunksapp.com/assets/chunks.js"></script>
+      <script src="https://www.chunksapp.com/assets/chunks.js"></script>
       CHUNKS_SCRIPT
 
       str.respond_to?(:html_safe) ? str.html_safe : str
 
     end
+
+  end
 
 end
