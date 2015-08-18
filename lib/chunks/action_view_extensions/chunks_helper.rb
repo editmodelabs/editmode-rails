@@ -42,3 +42,4 @@ module Chunks
   end
 
 end
+# ActionView::Base.send :include, Chunks::ActionViewExtensions::ChunksHelper
