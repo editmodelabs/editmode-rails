@@ -1,11 +1,11 @@
 # coding: utf-8
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'chunks/version'
+require 'chunks-rails/version'
 
 Gem::Specification.new do |spec|
-  spec.name          = "chunks"
-  spec.version       = Chunks::VERSION
+  spec.name          = "chunks-rails"
+  spec.version       = ChunksRails::VERSION
   spec.authors       = ["Tony Ennis"]
   spec.email         = ["ennis.tony@gmail.com"]
   spec.summary       = %q{Chunks allows you to turn plain text in your rails app into easily inline-editable chunks that can be managed by anyone with no technical knowledge}

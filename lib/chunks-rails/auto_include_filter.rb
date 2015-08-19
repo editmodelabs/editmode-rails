@@ -1,10 +1,10 @@
-module Chunks
+module ChunksRails
 
   module AutoInclude
 
     module Method
       def chunks_auto_include
-        Chunks::AutoInclude::Filter.filter(self)
+        ChunksRails::AutoInclude::Filter.filter(self)
       end
     end
 
@@ -50,7 +50,7 @@ module Chunks
       end
 
       def chunks_script_tag
-        @script_tag ||= ScriptTag.new()
+        @script_tag ||= ChunksRails::ScriptTag.new()
       end
 
       def enabled_for_environment?

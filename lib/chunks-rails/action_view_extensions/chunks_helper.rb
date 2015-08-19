@@ -1,4 +1,4 @@
-module Chunks
+module ChunksRails
 
   module ActionViewExtensions
     module ChunksHelper
@@ -42,4 +42,3 @@ module Chunks
   end
 
 end
-# ActionView::Base.send :include, Chunks::ActionViewExtensions::ChunksHelper

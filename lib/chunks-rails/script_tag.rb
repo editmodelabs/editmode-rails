@@ -1,4 +1,4 @@
-module Chunks
+module ChunksRails
 
   class ScriptTag
 
@@ -17,7 +17,7 @@ module Chunks
     def output
       
       str = <<-CHUNKS_SCRIPT
-      <script src="https://www.chunksapp.com/assets/chunks.js"></script>
+  <script src="https://www.chunksapp.com/assets/chunks.js"></script>
       CHUNKS_SCRIPT
 
       str.respond_to?(:html_safe) ? str.html_safe : str
