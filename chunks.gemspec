@@ -22,7 +22,8 @@ Gem::Specification.new do |spec|
 
   spec.add_development_dependency "bundler", "~> 1.6"
   spec.add_development_dependency "rake"
-  spec.add_development_dependency "github-markdown"
+  # spec.add_development_dependency "github-markup"
   spec.add_development_dependency "httparty"
+  spec.add_development_dependency "redcarpet"
 
 end

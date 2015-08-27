@@ -1,3 +1,4 @@
+
 module ChunksRails
 
   module ActionViewExtensions
@@ -16,7 +17,9 @@ module ChunksRails
         css_class = options[:css_class]
 
         if chunk_content.include? "\n"
-          chunk_content = GitHub::Markdown.render_gfm( chunk_content ).html_safe
+          renderer = Redcarpet::Render::HTML.new(no_links: true, hard_wrap: true)
+          markdown = Redcarpet::Markdown.new(renderer, extensions = {})
+          chunk_content = markdown.render(chunk_content).html_safe
         end
 
         case display_type
