@@ -9,7 +9,7 @@ module ChunksRails
         display_type = options[:display_type] || "span"
 
         chunk_content = Rails.cache.fetch("chunk_#{identifier}") do  
-          url = "https://api.chunksapp.com/v1/chunks/#{identifier}"
+          url = "https://www.chunksapp.com/v1/chunks/#{identifier}"
           response = HTTParty.get(url)
           chunk_content = response['content']
         end
