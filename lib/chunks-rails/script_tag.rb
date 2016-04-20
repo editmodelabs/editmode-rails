@@ -17,11 +17,15 @@ module ChunksRails
     def output
       
       str = <<-CHUNKS_SCRIPT
-  <script src="https://www.chunksapp.com/assets/chunks.js" async ></script>
+  <script src="#{script_url}" async ></script>
       CHUNKS_SCRIPT
 
       str.respond_to?(:html_safe) ? str.html_safe : str
 
+    end
+
+    def script_url 
+      ENV["CHUNKS_OVERRIDE_SCRIPT_URL"] || "https://www.chunksapp.com/assets/chunks.js"
     end
 
   end
