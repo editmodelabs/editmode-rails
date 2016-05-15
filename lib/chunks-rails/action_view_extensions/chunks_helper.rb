@@ -3,13 +3,25 @@ module ChunksRails
 
   module ActionViewExtensions
     module ChunksHelper
+
+      def api_version
+        "v1"
+      end
+
+      def api_root_url
+        ENV["CHUNKS_OVERRIDE_API_URL"] || "https://www.chunksapp.com/api"
+      end
+
+      def versioned_api_url
+        "#{api_root_url}/#{api_version}"
+      end
      
       def chunk_display(label,identifier,options={})
 
         display_type = options[:display_type] || "span"
 
         chunk_content = Rails.cache.fetch("chunk_#{identifier}") do  
-          url = "https://www.chunksapp.com/v1/chunks/#{identifier}"
+          url = "#{versioned_api_url}/chunks/#{identifier}"
           response = HTTParty.get(url)
           chunk_content = response['content']
         end
