@@ -30,6 +30,7 @@ module ChunksRails
       end
 
       def include_javascript?
+        !chunks_helper_disabled? &&
         enabled_for_environment? &&
         html_content_type? &&
         response_has_closing_body_tag? &&
