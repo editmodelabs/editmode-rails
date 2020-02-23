@@ -1,29 +1,20 @@
-# Chunks
 
-TODO: Write a gem description
+# Editmode Rails Gem
+
+To be completed
 
 ## Installation
 
-Add this line to your application's Gemfile:
+## How It Works
+- Autoload editmode.js
+- Expose view helper
 
-    gem 'chunks'
+## Helper methods
+- chunk_display
+- raw_chunk
+- chunk_list (coming soon)
 
-And then execute:
+## Caching
+- All chunks cached by default using Rails.cache
+- GET /editmode/clear_cache?identifier={} to clear cache
 
-    $ bundle
-
-Or install it yourself as:
-
-    $ gem install chunks
-
-## Usage
-
-TODO: Write usage instructions here
-
-## Contributing
-
-1. Fork it ( https://github.com/[my-github-username]/chunks/fork )
-2. Create your feature branch (`git checkout -b my-new-feature`)
-3. Commit your changes (`git commit -am 'Add some feature'`)
-4. Push to the branch (`git push origin my-new-feature`)
-5. Create a new Pull Request

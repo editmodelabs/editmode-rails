@@ -1,17 +1,16 @@
-module ChunksRails
+module EditModeRails
 
   module AutoInclude
 
     module Method
-      def chunks_auto_include
-        ChunksRails::AutoInclude::Filter.filter(self)
+      def editmode_auto_include
+        EditModeRails::AutoInclude::Filter.filter(self)
       end
     end
 
     class Filter
 
       CLOSING_BODY_TAG = %r{</body>}
-
       def self.filter(controller)
         auto_include_filter = new(controller)
         return unless auto_include_filter.include_javascript?
@@ -26,14 +25,14 @@ module ChunksRails
       end
 
       def include_javascript!
-        response.body = response.body.gsub(CLOSING_BODY_TAG, chunks_script_tag.output + '\\0')
+        response.body = response.body.gsub(CLOSING_BODY_TAG, editmode_script_tag.output + '\\0')
       end
 
       def include_javascript?
         enabled_for_environment? &&
         html_content_type? &&
         response_has_closing_body_tag? &&
-        chunks_script_tag.valid?
+        editmode_script_tag.valid?
       end
 
       private
@@ -49,8 +48,8 @@ module ChunksRails
         !!(response.body[CLOSING_BODY_TAG])
       end
 
-      def chunks_script_tag
-        @script_tag ||= ChunksRails::ScriptTag.new()
+      def editmode_script_tag
+        @script_tag ||= EditModeRails::ScriptTag.new()
       end
 
       def enabled_for_environment?

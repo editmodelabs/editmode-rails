@@ -1,15 +1,16 @@
-
-module ChunksRails
+module EditModeRails
 
   module ActionViewExtensions
-    module ChunksHelper
+    module EditModeHelper
+
+      require 'httparty'
 
       def api_version
         "v1"
       end
 
       def api_root_url
-        ENV["CHUNKS_OVERRIDE_API_URL"] || "https://www.chunksapp.com/api"
+        ENV["EDITMODE_OVERRIDE_API_URL"] || "https://www.editmode.app/api"
       end
 
       def versioned_api_url
@@ -18,8 +19,8 @@ module ChunksRails
      
       def chunk_display(label,identifier,options={})
 
-        chunk_content = Rails.cache.fetch("chunk_#{identifier}") do  
-          url = "#{versioned_api_url}/chunks/#{identifier}"
+        chunk_content = Rails.cache.fetch("bit_#{identifier}") do  
+          url = "#{versioned_api_url}/bits/#{identifier}"
           response = HTTParty.get(url)
           chunk_content = response['content']
         end
@@ -54,6 +55,10 @@ module ChunksRails
           chunk_content
         end
 
+      end
+
+      def bit(label,identifier,options={})
+        chunk_display(label,identifier)
       end
 
       def chunk(label,identifier,options={})

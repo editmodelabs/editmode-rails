@@ -1,4 +1,4 @@
-module Chunks
+module EditMode
 
   class Engine < Rails::Engine
 

@@ -1,4 +1,4 @@
-module ChunksRails
+module EditModeRails
 
   class ScriptTag
 
@@ -16,16 +16,16 @@ module ChunksRails
 
     def output
       
-      str = <<-CHUNKS_SCRIPT
+      str = <<-EDITMODE_SCRIPT
   <script src="#{script_url}" async ></script>
-      CHUNKS_SCRIPT
+      EDITMODE_SCRIPT
 
       str.respond_to?(:html_safe) ? str.html_safe : str
 
     end
 
     def script_url 
-      ENV["CHUNKS_OVERRIDE_SCRIPT_URL"] || "https://www.chunksapp.com/assets/chunks.js"
+      ENV["EDITMODE_OVERRIDE_SCRIPT_URL"] || "https://www.editmode.app/assets/chunks.js"
     end
 
   end
