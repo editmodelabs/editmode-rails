@@ -1,4 +1,4 @@
-class EditModeController < ApplicationController
+class EditmodeController < ApplicationController
 
   def clear_cache
 
