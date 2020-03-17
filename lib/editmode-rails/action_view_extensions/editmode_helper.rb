@@ -46,17 +46,33 @@ module EditModeRails
       def chunk_display(label,identifier,options={},custom_field_info={})
         
         begin 
+
           if custom_field_info.present?
             chunk_content = custom_field_info["value"]
           else
-            chunk_content = Rails.cache.fetch("bit_#{identifier}") do  
-              url = "#{versioned_api_url}/bits/#{identifier}"
+
+            cache_identifier = "chunk_#{identifier}"
+            url = "#{versioned_api_url}/bits/#{identifier}"
+
+            if !Rails.cache.exist?(cache_identifier)
               response = HTTParty.get(url)
-              chunk_content = response['content']
             end
+              
+            chunk_content = Rails.cache.fetch(cache_identifier) do  
+              response['content']
+            end
+
+            chunk_type = Rails.cache.fetch("#{cache_identifier}_type") do  
+              response['chunk_type']
+            end
+
           end
 
-          display_type = options[:display_type] || "span"
+          if chunk_type == "image"
+            display_type = "image"
+          else 
+            display_type = options[:display_type] || "span"
+          end
           css_class = options[:css_class]
           content_type = "plain"
 
@@ -86,6 +102,10 @@ module EditModeRails
             end
           when "raw"
             chunk_content
+          when "image"
+            content_tag(:span, :data => {:chunk => identifier, :chunk_editable => false}.merge(additional_data_properties)) do 
+              image_tag(chunk_content, :class => css_class) 
+            end
           end
        rescue => error
         puts error
@@ -94,11 +114,11 @@ module EditModeRails
       end
 
       def bit(label,identifier,options={})
-        chunk_display(label,identifier)
+        chunk_display(label,identifier,options)
       end
 
       def chunk(label,identifier,options={})
-        chunk_display(label,identifier)
+        chunk_display(label,identifier,options)
       end
 
       def raw_chunk(label,identifier,options={})
