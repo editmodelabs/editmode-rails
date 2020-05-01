@@ -1,7 +1,6 @@
 class EditmodeController < ApplicationController
 
   def clear_cache
-
     
     if params[:identifier]
       Rails.cache.delete("chunk_#{params[:identifier]}")
