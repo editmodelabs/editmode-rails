@@ -1,133 +1,137 @@
 module EditModeRails
+  module ActionViewExtensions
+    module EditModeHelper
 
-  require 'httparty'
+      require 'httparty'
 
-  def api_version
-    "v1"
-  end
-
-  def api_root_url
-    ENV["EDITMODE_OVERRIDE_API_URL"] || "https://www.editmode.app/api"
-  end
-
-  def versioned_api_url
-    "#{api_root_url}/#{api_version}"
-  end
- 
-  def chunk_collection(collection_identifier,has_tags=[])
-    begin 
-      url = "#{versioned_api_url}/chunks?collection_identifier=#{collection_identifier}"
-      response = HTTParty.get(url)
-      raise "No response received" unless response.code == 200
-      chunks = response["chunks"]
-      return chunks
-    rescue => error
-      puts error 
-      return []
-    end
-  end
-
-  def chunk_field_value(parent_chunk_object,custom_field_identifier,options={})
-
-    begin 
-      chunk_identifier = parent_chunk_object["identifier"]
-      custom_field_item = parent_chunk_object["content"].detect {|f| f[custom_field_identifier].present? }
-    
-      if custom_field_item.present?
-        properties = custom_field_item[custom_field_identifier]
-        render_chunk_content(
-          properties["identifier"],
-          properties["content"],
-          properties["chunk_type"]
-        )
-      end
-    rescue => errors
-      puts errors
-      content_tag(:span, "&nbsp".html_safe) 
-    end
-  
-  end
-
-  def render_chunk_content(chunk_identifier,chunk_content,chunk_type,options={})
-
-    begin 
-      # Always sanitize the content!!
-      chunk_content = ActionController::Base.helpers.sanitize(chunk_content)
-      
-      css_class = options[:css_class]
-
-      if chunk_type == "image"
-        display_type = "image"
-      else 
-        display_type = options[:display_type] || "span"
+      def api_version
+        "v1"
       end
 
-      case display_type
-      when "span"
-        if chunk_type == "rich_text"
-          content_tag(:span, :class => css_class, :data => {:chunk => chunk_identifier, :chunk_editable => false} ) do
-            chunk_content.html_safe
-          end
-        else
-          content_tag(:span, :class => css_class, :data => {:chunk => chunk_identifier, :chunk_editable => true} ) do
-            chunk_content
-          end
-        end
-      when "image"
-        content_tag(:span, :data => {:chunk => chunk_identifier, :chunk_editable => false} ) do 
-          image_tag(chunk_content, :class => css_class) 
+      def api_root_url
+        ENV["EDITMODE_OVERRIDE_API_URL"] || "https://www.editmode.app/api"
+      end
+
+      def versioned_api_url
+        "#{api_root_url}/#{api_version}"
+      end
+     
+      def chunk_collection(collection_identifier,has_tags=[])
+        begin 
+          url = "#{versioned_api_url}/chunks?collection_identifier=#{collection_identifier}"
+          response = HTTParty.get(url)
+          raise "No response received" unless response.code == 200
+          chunks = response["chunks"]
+          return chunks
+        rescue => error
+          puts error 
+          return []
         end
       end
-    rescue => errors
-      puts errors
-      content_tag(:span, "&nbsp".html_safe) 
-    end
 
-  end
+      def chunk_field_value(parent_chunk_object,custom_field_identifier,options={})
 
-  def chunk_display(label,identifier,options={},&block)
-
-    # This method should never show an error. 
-    # If anything goes wrong fetching content
-    # We should just show blank content, not
-    # prevent the page from loading.
-    begin 
-
-      cache_identifier = "chunk_#{identifier}"
-      url = "#{versioned_api_url}/chunks/#{identifier}"
-      cached_content_present = Rails.cache.exist?(cache_identifier)
-
-      if !cached_content_present
-        response = HTTParty.get(url)
-        response_received = true if response.code == 200
-      end
-
-      if !cached_content_present && !response_received
-        raise "No response received"
-      else
+        begin 
+          chunk_identifier = parent_chunk_object["identifier"]
+          custom_field_item = parent_chunk_object["content"].detect {|f| f[custom_field_identifier].present? }
         
-        chunk_content = Rails.cache.fetch(cache_identifier) do  
-          response['content']
+          if custom_field_item.present?
+            properties = custom_field_item[custom_field_identifier]
+            render_chunk_content(
+              properties["identifier"],
+              properties["content"],
+              properties["chunk_type"]
+            )
+          end
+        rescue => errors
+          puts errors
+          content_tag(:span, "&nbsp".html_safe) 
         end
+      
+      end
 
-        chunk_type = Rails.cache.fetch("#{cache_identifier}_type") do  
-          response['chunk_type']
+      def render_chunk_content(chunk_identifier,chunk_content,chunk_type,options={})
+
+        begin 
+          # Always sanitize the content!!
+          chunk_content = ActionController::Base.helpers.sanitize(chunk_content)
+          
+          css_class = options[:css_class]
+
+          if chunk_type == "image"
+            display_type = "image"
+          else 
+            display_type = options[:display_type] || "span"
+          end
+
+          case display_type
+          when "span"
+            if chunk_type == "rich_text"
+              content_tag(:span, :class => css_class, :data => {:chunk => chunk_identifier, :chunk_editable => false} ) do
+                chunk_content.html_safe
+              end
+            else
+              content_tag(:span, :class => css_class, :data => {:chunk => chunk_identifier, :chunk_editable => true} ) do
+                chunk_content
+              end
+            end
+          when "image"
+            content_tag(:span, :data => {:chunk => chunk_identifier, :chunk_editable => false} ) do 
+              image_tag(chunk_content, :class => css_class) 
+            end
+          end
+        rescue => errors
+          puts errors
+          content_tag(:span, "&nbsp".html_safe) 
         end
-
-        render_chunk_content(identifier,chunk_content,chunk_type)
 
       end
 
-    rescue => error
-      # Show fallback content by default
-      return content_tag(:span, &block) if block_given?
-      # Otherwise show a span with no content to 
-      # maintain layout
-      content_tag(:span, "&nbsp".html_safe) 
+      def chunk_display(label,identifier,options={},&block)
+
+        # This method should never show an error. 
+        # If anything goes wrong fetching content
+        # We should just show blank content, not
+        # prevent the page from loading.
+        begin 
+
+          cache_identifier = "chunk_#{identifier}"
+          url = "#{versioned_api_url}/chunks/#{identifier}"
+          cached_content_present = Rails.cache.exist?(cache_identifier)
+
+          if !cached_content_present
+            response = HTTParty.get(url)
+            response_received = true if response.code == 200
+          end
+
+          if !cached_content_present && !response_received
+            raise "No response received"
+          else
+            
+            chunk_content = Rails.cache.fetch(cache_identifier) do  
+              response['content']
+            end
+
+            chunk_type = Rails.cache.fetch("#{cache_identifier}_type") do  
+              response['chunk_type']
+            end
+
+            render_chunk_content(identifier,chunk_content,chunk_type)
+
+          end
+
+        rescue => error
+          # Show fallback content by default
+          return content_tag(:span, &block) if block_given?
+          # Otherwise show a span with no content to 
+          # maintain layout
+          content_tag(:span, "&nbsp".html_safe) 
+        end
+
+      end
+
+      alias_method :chunk, :chunk_display
+
     end
-
   end
-
-  alias_method :chunk, :chunk_display
-
 end
