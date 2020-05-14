@@ -41,7 +41,7 @@ module EditModeRails
       end
 
       def html_content_type?
-        response.content_type.include? 'text/html'
+        response.content_type.try(:include?,'text/html')
       end
 
       def response_has_closing_body_tag?
