@@ -88,15 +88,15 @@ module EditModeRails
       end
 
       def chunk_display(label,identifier,options={},&block)
-
+        branch_id = params[:branch_id]
         # This method should never show an error. 
         # If anything goes wrong fetching content
         # We should just show blank content, not
         # prevent the page from loading.
         begin 
-
-          cache_identifier = "chunk_#{identifier}"
-          url = "#{versioned_api_url}/chunks/#{identifier}"
+          branch_params = branch_id.present? ? "branch_id=#{branch_id}" : ""
+          cache_identifier = "chunk_#{identifier}#{branch_id}"
+          url = "#{versioned_api_url}/chunks/#{identifier}?#{branch_params}"
           cached_content_present = Rails.cache.exist?(cache_identifier)
 
           if !cached_content_present
