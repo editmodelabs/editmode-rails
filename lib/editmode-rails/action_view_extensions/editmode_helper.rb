@@ -88,7 +88,7 @@ module EditModeRails
       end
 
       def chunk_display(label,identifier,options={},&block)
-        branch_id = params[:branch_id]
+        branch_id = params[:em_branch_id]
         # This method should never show an error. 
         # If anything goes wrong fetching content
         # We should just show blank content, not
