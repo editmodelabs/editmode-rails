@@ -40,7 +40,8 @@ module EditModeRails
             render_chunk_content(
               properties["identifier"],
               properties["content"],
-              properties["chunk_type"]
+              properties["chunk_type"],
+              { collection_identifier: parent_chunk_object["collection"]["identifier"] }
             )
           end
         rescue => errors
@@ -64,19 +65,25 @@ module EditModeRails
             display_type = options[:display_type] || "span"
           end
 
+          chunk_data = { :chunk => chunk_identifier, :chunk_editable => false }
+
+          if options[:collection_identifier].present?
+            chunk_data.merge!({collection_identifier: options[:collection_identifier})
+          end
+
           case display_type
           when "span"
             if chunk_type == "rich_text"
-              content_tag(:span, :class => css_class, :data => {:chunk => chunk_identifier, :chunk_editable => false} ) do
+              content_tag(:span, :class => css_class, :data => chunk_data ) do
                 chunk_content.html_safe
               end
             else
-              content_tag(:span, :class => css_class, :data => {:chunk => chunk_identifier, :chunk_editable => true} ) do
+              content_tag(:span, :class => css_class, :data => chunk_data.merge!({:chunk_editable => true}) ) do
                 chunk_content
               end
             end
           when "image"
-            content_tag(:span, :data => {:chunk => chunk_identifier, :chunk_editable => false} ) do 
+            content_tag(:span, :data => chunk_data ) do 
               image_tag(chunk_content, :class => css_class) 
             end
           end
