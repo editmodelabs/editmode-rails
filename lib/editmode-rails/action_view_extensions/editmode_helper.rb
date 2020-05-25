@@ -68,7 +68,7 @@ module EditModeRails
           chunk_data = { :chunk => chunk_identifier, :chunk_editable => false }
 
           if options[:collection_identifier].present?
-            chunk_data.merge!({collection_identifier: options[:collection_identifier])
+            chunk_data.merge!({collection_identifier: options[:collection_identifier]})
           end
 
           case display_type
