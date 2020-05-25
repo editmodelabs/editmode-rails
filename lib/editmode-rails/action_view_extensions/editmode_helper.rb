@@ -41,7 +41,7 @@ module EditModeRails
               properties["identifier"],
               properties["content"],
               properties["chunk_type"],
-              { collection_identifier: parent_chunk_object["collection"]["identifier"] }
+              { parent_identifier: chunk_identifier }
             )
           end
         rescue => errors
@@ -67,8 +67,8 @@ module EditModeRails
 
           chunk_data = { :chunk => chunk_identifier, :chunk_editable => false }
 
-          if options[:collection_identifier].present?
-            chunk_data.merge!({collection_identifier: options[:collection_identifier]})
+          if options[:parent_identifier].present?
+            chunk_data.merge!({parent_identifier: options[:parent_identifier]})
           end
 
           case display_type
