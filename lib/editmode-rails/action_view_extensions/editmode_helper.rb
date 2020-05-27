@@ -17,9 +17,9 @@ module EditModeRails
       end
      
       def chunk_collection(collection_identifier,has_tags=[])
-        branch_id = params[:em_branch_id]
+        branch_params = params[:em_branch_id].present? ? "branch_id=#{branch_id}" : ""
         begin 
-          url = "#{versioned_api_url}/chunks?collection_identifier=#{collection_identifier}&branch_id=#{branch_id}"
+          url = "#{versioned_api_url}/chunks?collection_identifier=#{collection_identifier}&#{branch_params}"
           response = HTTParty.get(url)
           raise "No response received" unless response.code == 200
           chunks = response["chunks"]
