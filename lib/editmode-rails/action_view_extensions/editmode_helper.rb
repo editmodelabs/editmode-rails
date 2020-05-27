@@ -17,7 +17,7 @@ module EditModeRails
       end
      
       def chunk_collection(collection_identifier,has_tags=[])
-        branch_params = params[:em_branch_id].present? ? "branch_id=#{branch_id}" : ""
+        branch_params = params[:em_branch_id].present? ? "branch_id=#{params[:em_branch_id]}" : ""
         begin 
           url = "#{versioned_api_url}/chunks?collection_identifier=#{collection_identifier}&#{branch_params}"
           response = HTTParty.get(url)
