@@ -124,7 +124,7 @@ module EditModeRails
               response['chunk_type']
             end
 
-            render_chunk_content(identifier,chunk_content,chunk_type)
+            render_chunk_content(identifier,chunk_content,chunk_type, options)
 
           end
 
