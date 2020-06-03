@@ -84,9 +84,7 @@ module EditModeRails
               end
             end
           when "image"
-            content_tag(:span, :data => chunk_data ) do 
-              image_tag(chunk_content, :class => css_class) 
-            end
+            image_tag(chunk_content, :data => chunk_data, :class => css_class) 
           end
         rescue => errors
           puts errors
