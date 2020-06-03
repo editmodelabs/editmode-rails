@@ -42,7 +42,7 @@ module EditModeRails
               properties["identifier"],
               properties["content"],
               properties["chunk_type"],
-              { parent_identifier: chunk_identifier }
+              { parent_identifier: chunk_identifier }.merge(options)
             )
           end
         rescue => errors
@@ -124,7 +124,7 @@ module EditModeRails
               response['chunk_type']
             end
 
-            render_chunk_content(identifier,chunk_content,chunk_type)
+            render_chunk_content(identifier,chunk_content,chunk_type, options)
 
           end
 
