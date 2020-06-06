@@ -25,7 +25,7 @@ module EditModeRails
     end
 
     def script_url 
-      ENV["EDITMODE_OVERRIDE_SCRIPT_URL"] || "https://www.editmode.app/assets/chunks.js"
+      ENV["EDITMODE_OVERRIDE_SCRIPT_URL"] || "https://static.editmode.com/js/editmode-original.js"
     end
 
   end
