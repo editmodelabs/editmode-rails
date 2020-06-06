@@ -5,21 +5,17 @@ module EditModeRails
       require 'httparty'
 
       def api_version
-        "v1"
+        # Todo Add Header Version
       end
 
       def api_root_url
-        ENV["EDITMODE_OVERRIDE_API_URL"] || "https://www.editmode.app/api"
+        ENV["EDITMODE_OVERRIDE_API_URL"] || "https://api.editmode.com"
       end
 
-      def versioned_api_url
-        "#{api_root_url}/#{api_version}"
-      end
-     
       def chunk_collection(collection_identifier,has_tags=[])
         branch_params = params[:em_branch_id].present? ? "branch_id=#{params[:em_branch_id]}" : ""
         begin 
-          url = "#{versioned_api_url}/chunks?collection_identifier=#{collection_identifier}&#{branch_params}"
+          url = "#{api_root_url}/chunks?collection_identifier=#{collection_identifier}&#{branch_params}"
           response = HTTParty.get(url)
           raise "No response received" unless response.code == 200
           chunks = response["chunks"]
@@ -102,7 +98,7 @@ module EditModeRails
         begin 
           branch_params = branch_id.present? ? "branch_id=#{branch_id}" : ""
           cache_identifier = "chunk_#{identifier}#{branch_id}"
-          url = "#{versioned_api_url}/chunks/#{identifier}?#{branch_params}"
+          url = "#{api_root_url}/chunks/#{identifier}?#{branch_params}"
           cached_content_present = Rails.cache.exist?(cache_identifier)
 
           if !cached_content_present

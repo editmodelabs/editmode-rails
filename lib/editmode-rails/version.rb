@@ -1,3 +1,3 @@
 module EditModeRails
-  VERSION = "0.0.9.89"
+  VERSION = "0.0.9.90"
 end
