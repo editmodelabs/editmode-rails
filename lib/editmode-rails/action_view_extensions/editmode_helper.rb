@@ -33,11 +33,10 @@ module EditModeRails
           custom_field_item = parent_chunk_object["content"].detect {|f| f["custom_field_identifier"] == custom_field_identifier }
         
           if custom_field_item.present?
-            properties = custom_field_item[custom_field_identifier]
             render_chunk_content(
-              properties["identifier"],
-              properties["content"],
-              properties["chunk_type"],
+              custom_field_item["identifier"],
+              custom_field_item["content"],
+              custom_field_item["chunk_type"],
               { parent_identifier: chunk_identifier }.merge(options)
             )
           end
