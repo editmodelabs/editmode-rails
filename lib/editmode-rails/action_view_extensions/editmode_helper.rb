@@ -26,11 +26,11 @@ module EditModeRails
         end
       end
 
-      def chunk_field_value(parent_chunk_object,custom_field_identifier,options={})
+      def chunk_field_value(parent_chunk_object, custom_field_identifier,options={})
 
         begin 
           chunk_identifier = parent_chunk_object["identifier"]
-          custom_field_item = parent_chunk_object["content"].detect {|f| f[custom_field_identifier].present? }
+          custom_field_item = parent_chunk_object["content"].detect {|f| f["custom_field_identifier"] == custom_field_identifier }
         
           if custom_field_item.present?
             properties = custom_field_item[custom_field_identifier]
