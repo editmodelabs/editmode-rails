@@ -1,8 +1,10 @@
 class EditmodeController < ApplicationController
 
   def clear_cache
-    
-    if params[:identifier]
+    if params[:full]
+      Rails.cache.clear
+      render status: 200, json: {:response => "success"}
+    elsif params[:identifier]
       Rails.cache.delete("chunk_#{params[:identifier]}")
       Rails.cache.delete("chunk_#{params[:identifier]}_type")
       render status: 200, json: {:response => "success"}
