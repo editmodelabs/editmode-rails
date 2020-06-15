@@ -94,7 +94,7 @@ module EditModeRails
         # If anything goes wrong fetching content
         # We should just show blank content, not
         # prevent the page from loading.
-        begin 
+        begin
           branch_params = branch_id.present? ? "branch_id=#{branch_id}" : ""
           cache_identifier = "chunk_#{identifier}#{branch_id}"
           url = "#{api_root_url}/chunks/#{identifier}?#{branch_params}"
