@@ -70,11 +70,11 @@ module EditModeRails
           case display_type
           when "span"
             if chunk_type == "rich_text"
-              content_tag(:span, :class => css_class, :data => chunk_data ) do
+              content_tag("em-span", :class => css_class, :data => chunk_data ) do
                 chunk_content.html_safe
               end
             else
-              content_tag(:span, :class => css_class, :data => chunk_data.merge!({:chunk_editable => true}) ) do
+              content_tag("em-span", :class => css_class, :data => chunk_data.merge!({:chunk_editable => true}) ) do
                 chunk_content
               end
             end
@@ -83,7 +83,7 @@ module EditModeRails
           end
         rescue => errors
           puts errors
-          content_tag(:span, "&nbsp".html_safe) 
+          content_tag("em-span", "&nbsp".html_safe) 
         end
 
       end
@@ -123,10 +123,10 @@ module EditModeRails
 
         rescue => error
           # Show fallback content by default
-          return content_tag(:span, &block) if block_given?
+          return content_tag("em-span", &block) if block_given?
           # Otherwise show a span with no content to 
           # maintain layout
-          content_tag(:span, "&nbsp".html_safe) 
+          content_tag("em-span", "&nbsp".html_safe) 
         end
 
       end
