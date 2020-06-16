@@ -19,7 +19,7 @@ class Editmode
       yield config
     end
 
-    def chunk(identifier, **options)
+    def chunk_value(identifier, **options)
       body = options[:values].presence || {}
       field_id = options[:field_id].presence
       branch_id = options[:branch_id].presence
