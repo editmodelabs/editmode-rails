@@ -17,6 +17,7 @@ module EditModeRails
     def output
       
       str = <<-EDITMODE_SCRIPT
+  <script>window.chunksProjectIdentifier = #{Editmode.project_id}</script>
   <script src="#{script_url}" async ></script>
       EDITMODE_SCRIPT
 
