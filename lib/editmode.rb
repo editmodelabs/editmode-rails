@@ -9,6 +9,14 @@ require 'editmode-rails/engine' if defined?(Rails)
 class Editmode
   class << self
     include ::EditModeRails::ActionViewExtensions::EditModeHelper
+    def project_id
+      @config.project_id
+    end
+
+    def access_token
+      @config.access_token
+    end
+
     def config
       # Todo: Instantiate in editmode initializer or base controllers
       # Todo: Add a generator to create initializer an file? 
