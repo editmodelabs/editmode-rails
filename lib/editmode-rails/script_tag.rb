@@ -17,6 +17,7 @@ module EditModeRails
     def output
       
       str = <<-EDITMODE_SCRIPT
+  <script>window.chunksProjectIdentifier = '#{Editmode.project_id}'</script>
   <script src="#{script_url}" async ></script>
       EDITMODE_SCRIPT
 
@@ -25,7 +26,7 @@ module EditModeRails
     end
 
     def script_url 
-      ENV["EDITMODE_OVERRIDE_SCRIPT_URL"] || "https://www.editmode.app/assets/chunks.js"
+      ENV["EDITMODE_OVERRIDE_SCRIPT_URL"] || "https://static.editmode.com/editmode@1.0.0/dist/editmode.js"
     end
 
   end
