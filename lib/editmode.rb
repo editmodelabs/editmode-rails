@@ -9,12 +9,16 @@ require 'editmode-rails/engine' if defined?(Rails)
 class Editmode
   class << self
     include ::EditModeRails::ActionViewExtensions::EditModeHelper
+    def project_id=(id)
+      config.project_id = id
+    end
+
     def project_id
-      @config.project_id
+      config.project_id
     end
 
     def access_token
-      @config.access_token
+      config.access_token
     end
 
     def config
