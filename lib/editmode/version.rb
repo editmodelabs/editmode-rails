@@ -1,3 +1,3 @@
 module Editmode
-  VERSION = "0.0.9.127"
+  VERSION = "0.0.10.1"
 end
