@@ -1,10 +1,10 @@
-module EditModeRails
+module Editmode
 
   module AutoInclude
 
     module Method
       def editmode_auto_include
-        EditModeRails::AutoInclude::Filter.filter(self)
+        Editmode::AutoInclude::Filter.filter(self)
       end
     end
 
@@ -49,7 +49,7 @@ module EditModeRails
       end
 
       def editmode_script_tag
-        @script_tag ||= EditModeRails::ScriptTag.new()
+        @script_tag ||= Editmode::ScriptTag.new()
       end
 
       def enabled_for_environment?

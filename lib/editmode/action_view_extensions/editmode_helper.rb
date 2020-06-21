@@ -1,6 +1,6 @@
-module EditModeRails
+module Editmode
   module ActionViewExtensions
-    module EditModeHelper
+    module EditmodeHelper
 
       require 'httparty'
 

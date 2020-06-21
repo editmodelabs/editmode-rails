@@ -1,4 +1,4 @@
-module EditMode
+module Editmode
 
   class Engine < Rails::Engine
 

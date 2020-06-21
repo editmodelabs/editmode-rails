@@ -1,4 +1,4 @@
-module EditModeRails
+module Editmode
 
   class ScriptTag
 

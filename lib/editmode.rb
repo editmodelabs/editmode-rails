@@ -1,14 +1,14 @@
 require "active_support/dependencies"
-require "editmode-rails/version"
-require 'editmode-rails/script_tag'
-require 'editmode-rails/action_view_extensions/editmode_helper'
-require 'editmode-rails/auto_include_filter'
-require 'editmode-rails/railtie' if defined? Rails
-require 'editmode-rails/engine' if defined?(Rails)
+require "editmode/version"
+require 'editmode/script_tag'
+require 'editmode/action_view_extensions/editmode_helper'
+require 'editmode/auto_include_filter'
+require 'editmode/railtie' if defined? Rails
+require 'editmode/engine' if defined?(Rails)
 
-class Editmode
+module Editmode
   class << self
-    include ::EditModeRails::ActionViewExtensions::EditModeHelper
+    include Editmode::ActionViewExtensions::EditmodeHelper
     def project_id=(id)
       config.project_id = id
     end

@@ -1,9 +1,9 @@
-module EditModeRails
+module Editmode
   class Railtie < Rails::Railtie
-    initializer "editmode-rails" do |app|
+    initializer "editmode" do |app|
 
       ActiveSupport.on_load :action_view do
-        include EditModeRails::ActionViewExtensions::EditModeHelper
+        include Editmode::ActionViewExtensions::EditmodeHelper
       end
       ActiveSupport.on_load :action_controller do
         include AutoInclude::Method
