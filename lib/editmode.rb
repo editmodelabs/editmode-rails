@@ -35,24 +35,32 @@ module Editmode
       body = options[:values].presence || {}
       field_id = options[:field_id].presence
       branch_id = options[:branch_id].presence
-
-      branch_params = branch_id.present? ? "branch_id=#{branch_id}" : ""
-      cache_identifier = "chunk_#{identifier}#{branch_id}"
-      url = "#{api_root_url}/chunks/#{identifier}?#{branch_params}"
-
+      
       begin
-        response = HTTParty.get(url, query: body)
-        response_received = true if response.code == 200
+        branch_params = branch_id.present? ? "branch_id=#{branch_id}" : ""
+        url = "#{api_root_url}/chunks/#{identifier}?#{branch_params}"
 
-        if !response_received
+        cache_identifier = "chunk_value_#{identifier}#{field_id}#{branch_id}"
+        cached_content_present = Rails.cache.exist?(cache_identifier)
+
+        if !cached_content_present
+          response = HTTParty.get(url, query: body)
+          response_received = true if response.code == 200
+        end
+
+        if !cached_content_present && !response_received
           raise "No response received"
         else
-          if field_id.present?
-            chunk = response["content"].detect {|f| f["custom_field_identifier"] == field_id }
-            chunk['content']
-          else
+          chunk = Rails.cache.fetch(cache_identifier) do
             response['content']
           end
+
+          if field_id.present?
+            chunk = chunk.detect {|f| f["custom_field_identifier"] == field_id }
+            chunk = chunk['content']
+          end
+          
+          chunk          
         end
       rescue => error
         # Todo: Send a log to editmode prob like sentry
