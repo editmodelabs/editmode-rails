@@ -133,6 +133,28 @@ module Editmode
 
       alias_method :chunk, :chunk_display
 
+      def variable_parse!(content, variables, values)
+        tokens = content.scan(/\{{(.*?)\}}/)
+        if tokens.any?
+          tokens.flatten! 
+          tokens.each do |token|
+            token_value = values[token.to_sym] || variables[token] || token
+            sanitized_value = ActionController::Base.helpers.sanitize(token_value)
+
+            content.gsub!("{{#{token}}}", sanitized_value)
+          end
+        end
+
+        content
+      end
+
+      def no_response_received(id = "")
+        "Sorry, we can't find a content using this identifier: \"#{id}\""
+      end
+      
+      def require_field_id
+        "Field ID or Field Name is required to retrieve a collection item"
+      end
     end
   end
 end
