@@ -33,7 +33,8 @@ module Editmode
 
     def chunk_value(identifier, **options)
       begin
-        Editmode::ChunkValue.new(identifier, options)
+        options.merge!(project_id: project_id)
+        Editmode::ChunkValue.new(identifier, **options )
       rescue => er
         raise er
       end

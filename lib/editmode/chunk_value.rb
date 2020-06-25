@@ -41,7 +41,7 @@ module Editmode
 
       cache_identifier = "chunk_#{identifier}#{branch_id}"
       cached_content_present = Rails.cache.exist?(cache_identifier)
-      cached_content_present = Rails.cache.exist?("chunk_#{project_id || identifier}_variables") if cached_content_present
+      cached_content_present = Rails.cache.exist?("chunk_#{project_id}_variables") if cached_content_present
 
       if !cached_content_present
         response = HTTParty.get(url)
@@ -61,7 +61,7 @@ module Editmode
 
         # Since variables are defined in the project level,
         # We use project_id as cache identifier
-        @variable_fallbacks = Rails.cache.fetch("chunk_#{}_variables") do
+        @variable_fallbacks = Rails.cache.fetch("chunk_#{project_id}_variables") do
           response['variable_fallbacks']
         end
       end      

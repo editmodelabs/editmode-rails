@@ -138,7 +138,7 @@ module Editmode
         if tokens.any?
           tokens.flatten! 
           tokens.each do |token|
-            token_value = values[token.to_sym] || variables[token] || token
+            token_value = values[token.to_sym] || variables[token] || ""
             sanitized_value = ActionController::Base.helpers.sanitize(token_value)
 
             content.gsub!("{{#{token}}}", sanitized_value)
