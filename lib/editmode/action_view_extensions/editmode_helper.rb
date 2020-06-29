@@ -12,13 +12,26 @@ module Editmode
         ENV["EDITMODE_OVERRIDE_API_URL"] || "https://api.editmode.com"
       end
 
-      def chunk_collection(collection_identifier,has_tags=[])
+      def chunk_collection(collection_identifier, **options)
         branch_params = params[:em_branch_id].present? ? "branch_id=#{params[:em_branch_id]}" : ""
+        tags = options[:tags] || []
         begin 
           url = "#{api_root_url}/chunks?collection_identifier=#{collection_identifier}&#{branch_params}"
           response = HTTParty.get(url)
           raise "No response received" unless response.code == 200
           chunks = response["chunks"]
+          if chunks.any?
+            # Collection item limit
+            limit = options[:limit] || chunks.size
+
+            chunks = chunks.take(limit)
+            chunks.shuffle! if options[:shuffle]
+          end
+
+          if tags.any?
+            chunks.select!{|c| (tags - c['tags']).size < tags.size }
+          end
+
           return chunks
         rescue => error
           puts error 
@@ -53,7 +66,7 @@ module Editmode
           # Always sanitize the content!!
           chunk_content = ActionController::Base.helpers.sanitize(chunk_content)
           
-          css_class = options[:css_class]
+          css_class = options[:class]
 
           if chunk_type == "image"
             display_type = "image"
