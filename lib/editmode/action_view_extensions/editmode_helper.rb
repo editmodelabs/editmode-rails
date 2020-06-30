@@ -14,23 +14,26 @@ module Editmode
 
       def chunk_collection(collection_identifier, **options)
         branch_params = params[:em_branch_id].present? ? "branch_id=#{params[:em_branch_id]}" : ""
-        tags = options[:tags] || []
+        branch_id = params[:em_branch_id].presence
+        tags = options[:tags].presence || []
+        limit = options[:limit].presence
+
         begin 
-          url = "#{api_root_url}/chunks?collection_identifier=#{collection_identifier}&#{branch_params}"
+          url_params = { 
+            :collection_identifier => collection_identifier,
+            :branch_id => branch_id,
+            :limit => limit,
+            :tags => tags
+          }.to_query
+
+          url = URI(api_root_url)
+          url.path = '/chunks'
+          url.query = url_params
+
           response = HTTParty.get(url)
+
           raise "No response received" unless response.code == 200
           chunks = response["chunks"]
-          if chunks.any?
-            # Collection item limit
-            limit = options[:limit] || chunks.size
-
-            chunks = chunks.take(limit)
-            chunks.shuffle! if options[:shuffle]
-          end
-
-          if tags.any?
-            chunks.select!{|c| (tags - c['tags']).size < tags.size }
-          end
 
           return chunks
         rescue => error
