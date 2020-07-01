@@ -165,7 +165,7 @@ module Editmode
       end
 
       def no_response_received(id = "")
-        "Sorry, we can't find a content using this identifier: \"#{id}\""
+        "Sorry, we can't find a chunk using this identifier: \"#{id}\". This can happen if you've deleted a chunk on editmode.com or if your local cache is out of date. If it persists, try running Rails.cache clear."
       end
       
       def require_field_id
