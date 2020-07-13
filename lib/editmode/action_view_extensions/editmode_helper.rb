@@ -77,7 +77,7 @@ module Editmode
             display_type = options[:display_type] || "span"
           end
 
-          chunk_data = { :chunk => chunk_identifier, :chunk_editable => false }
+          chunk_data = { :chunk => chunk_identifier, :chunk_editable => false, :chunk_type => chunk_type }
 
           if options[:parent_identifier].present?
             chunk_data.merge!({parent_identifier: options[:parent_identifier]})
