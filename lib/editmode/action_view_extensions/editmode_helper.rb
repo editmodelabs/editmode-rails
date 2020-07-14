@@ -86,7 +86,7 @@ module Editmode
           case display_type
           when "span"
             if chunk_type == "rich_text"
-              content_tag("em-span", :class => css_class, :data => chunk_data ) do
+              content_tag("em-span", :class => "editmode-richtext-editor #{css_class}", :data => chunk_data.merge!({:chunk_editable => true}) ) do
                 chunk_content.html_safe
               end
             else
