@@ -90,7 +90,7 @@ module Editmode
                 chunk_content.html_safe
               end
             else
-              content_tag("em-span", :class => css_class, :data => chunk_data.merge!({:chunk_editable => (chunk_type == 'long_text' ? true : 'plaintext-only' )}) ) do
+              content_tag("em-span", :class => css_class, :data => chunk_data.merge!({:chunk_editable => true}) ) do
                 chunk_content
               end
             end
