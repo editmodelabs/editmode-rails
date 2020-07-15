@@ -4,7 +4,9 @@ module Editmode
 
     attr_accessor :identifier, :variable_values, :branch_id, 
                   :variable_fallbacks, :chunk_type, :project_id, 
-                  :response, :content
+                  :response
+
+    attr_writer :content
 
     def initialize(identifier, **options)
       @identifier = identifier
@@ -29,9 +31,15 @@ module Editmode
           raise require_field_id
         end
       else
-        raise "undefined method field for chunk_type: #{chunk_type}"
+        raise NoMethodError.new "undefined method 'field` for chunk_type: #{chunk_type} \n"
       end
       result ||= content
+    end
+
+    def content
+      raise NoMethodError.new "undefined method 'content` for chunk_type: collection_item \nDid you mean? field" if chunk_type == 'collection_item'
+      
+      variable_parse!(@content, variable_fallbacks, variable_values)
     end
 
     private

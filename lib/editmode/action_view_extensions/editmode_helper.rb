@@ -67,8 +67,8 @@ module Editmode
 
         begin 
           # Always sanitize the content!!
-          chunk_content = ActionController::Base.helpers.sanitize(chunk_content)
-          
+          chunk_content = ActionController::Base.helpers.sanitize(chunk_content) unless chunk_type == 'rich_text'
+
           css_class = options[:class]
 
           if chunk_type == "image"
@@ -86,7 +86,7 @@ module Editmode
           case display_type
           when "span"
             if chunk_type == "rich_text"
-              content_tag("em-span", :class => "editmode-richtext-editor #{css_class}", :data => chunk_data.merge!({:chunk_editable => true}) ) do
+              content = content_tag("em-span", :class => "editmode-richtext-editor #{css_class}", :data => chunk_data.merge!({:chunk_editable => true}) ) do
                 chunk_content.html_safe
               end
             else
