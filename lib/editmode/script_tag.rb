@@ -18,6 +18,7 @@ module Editmode
       
       str = <<-EDITMODE_SCRIPT
   <script>window.chunksProjectIdentifier = '#{Editmode.project_id}'</script>
+  <script>window.editmodeENV = '#{ENV["EDITMODE_ENV"] || 'production'}'</script>
   <script src="#{script_url}" async ></script>
       EDITMODE_SCRIPT
 
