@@ -33,7 +33,7 @@ module Editmode
       else
         raise NoMethodError.new "undefined method 'field` for chunk_type: #{chunk_type} \n"
       end
-      result ||= content
+      result || ""
     end
 
     def content
