@@ -20,7 +20,7 @@ module Editmode
       if chunk_type == 'collection_item'
         if field.present?
           field.downcase!
-          field_content = content.detect {|f| f["custom_field_identifier"].downcase == field || f["custom_field_name"].downcase == field }
+          field_content = @content.detect {|f| f["custom_field_identifier"].downcase == field || f["custom_field_name"].downcase == field }
           if field_content.present?
             result = field_content['content']
             result = variable_parse!(result, variable_fallbacks, variable_values)
@@ -33,7 +33,7 @@ module Editmode
       else
         raise NoMethodError.new "undefined method 'field` for chunk_type: #{chunk_type} \n"
       end
-      result || ""
+      result || @content
     end
 
     def content
