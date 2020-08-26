@@ -42,8 +42,9 @@ module Editmode
         end
       end
 
-      def chunk_field_value(parent_chunk_object, custom_field_identifier,options={})
+      alias_method :c, :chunk_collection
 
+      def chunk_field_value(parent_chunk_object, custom_field_identifier, options = {})
         begin 
           chunk_identifier = parent_chunk_object["identifier"]
           custom_field_item = parent_chunk_object["content"].detect {|f| f["custom_field_identifier"] == custom_field_identifier }
@@ -63,7 +64,7 @@ module Editmode
       
       end
 
-      def render_chunk_content(chunk_identifier,chunk_content,chunk_type,options={})
+      def render_chunk_content(chunk_identifier, chunk_content, chunk_type,options = {})
 
         begin 
           # Always sanitize the content!!
@@ -104,7 +105,7 @@ module Editmode
 
       end
 
-      def chunk_display(label,identifier,options={},&block)
+      def chunk_display(identifier, options = {}, &block)
         branch_id = params[:em_branch_id]
         # This method should never show an error. 
         # If anything goes wrong fetching content
@@ -147,7 +148,15 @@ module Editmode
 
       end
 
-      alias_method :chunk, :chunk_display
+      def render_chunk(identifier, options = {}, &block)
+        parent_chunk = options[:parent]
+        if parent_chunk.present?
+          return chunk_field_value(parent_chunk, identifier, options, &block)
+        end
+        chunk_display(identifier, options, &block)
+      end
+
+      alias_method :e, :render_chunk
 
       def variable_parse!(content, variables, values)
         tokens = content.scan(/\{{(.*?)\}}/)
