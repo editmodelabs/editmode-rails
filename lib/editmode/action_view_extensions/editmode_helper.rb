@@ -1,8 +1,10 @@
+require 'editmode/helper'
+
 module Editmode
   module ActionViewExtensions
     module EditmodeHelper
-
       require 'httparty'
+      include Editmode::Helper
 
       def api_version
         # Todo Add Header Version
@@ -105,7 +107,7 @@ module Editmode
 
       end
 
-      def chunk_display(identifier, options = {}, &block)
+      def chunk_display(label, identifier, options = {}, &block)
         branch_id = params[:em_branch_id]
         # This method should never show an error. 
         # If anything goes wrong fetching content
@@ -114,7 +116,7 @@ module Editmode
         begin
           branch_params = branch_id.present? ? "branch_id=#{branch_id}" : ""
           cache_identifier = "chunk_#{identifier}#{branch_id}"
-          url = "#{api_root_url}/chunks/#{identifier}?#{branch_params}"
+          url = "#{api_root_url}/chunks/#{identifier}?project_id=#{Editmode.project_id}&#{branch_params}"
           cached_content_present = Rails.cache.exist?(cache_identifier)
 
           if !cached_content_present
@@ -153,10 +155,11 @@ module Editmode
         if parent_chunk.present?
           return chunk_field_value(parent_chunk, identifier, options, &block)
         end
-        chunk_display(identifier, options, &block)
+        chunk_display('label', identifier, options, &block)
       end
 
-      alias_method :e, :render_chunk
+      alias_method :E, :render_chunk
+      alias_method :chunk, :chunk_display
 
       def variable_parse!(content, variables, values)
         tokens = content.scan(/\{{(.*?)\}}/)
