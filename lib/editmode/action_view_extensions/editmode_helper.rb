@@ -51,6 +51,25 @@ module Editmode
       end
       alias_method :c, :chunk_collection
 
+      def chunk_field_value(parent_chunk_object, custom_field_identifier, options = {})
+        begin 
+          chunk_identifier = parent_chunk_object["identifier"]
+          custom_field_item = parent_chunk_object["content"].detect {|f| f["custom_field_identifier"] == custom_field_identifier || f["custom_field_name"] == custom_field_identifier }
+          
+          if custom_field_item.present?
+            render_chunk_content(
+              custom_field_item["identifier"],
+              custom_field_item["content"],
+              custom_field_item["chunk_type"],
+              { parent_identifier: chunk_identifier }.merge(options)
+            )
+          end
+        rescue => errors
+          puts errors
+          content_tag(:span, "&nbsp".html_safe) 
+        end
+      end
+
       def render_chunk_content(chunk_identifier, chunk_content, chunk_type,options = {})
 
         begin 

@@ -11,7 +11,7 @@ module Editmode
     def initialize(identifier, **options)
       @identifier = identifier
       @branch_id = options[:branch_id].presence
-      @variable_values = options[:values].presence || {}
+      @variable_values = options[:variables].presence || {}
       get_content
     end
 
