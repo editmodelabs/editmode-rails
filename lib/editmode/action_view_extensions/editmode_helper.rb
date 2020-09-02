@@ -38,16 +38,12 @@ module Editmode
           raise "No response received" unless response.code == 200
           chunks = response["chunks"]
 
-          response = []
           if chunks.any?
             chunks.each do |chunk|
               @custom_field_chunk = chunk
-              response << yield
+              yield
             end
           end
-          
-          
-          # return response.join
         rescue => error
           puts error 
           return []
