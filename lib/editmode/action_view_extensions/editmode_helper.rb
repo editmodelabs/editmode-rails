@@ -14,12 +14,13 @@ module Editmode
         ENV["EDITMODE_OVERRIDE_API_URL"] || "https://api.editmode.com"
       end
 
-      def chunk_collection(collection_identifier, **options)
+      def chunk_collection(collection_identifier, **options, &block)
         branch_params = params[:em_branch_id].present? ? "branch_id=#{params[:em_branch_id]}" : ""
         branch_id = params[:em_branch_id].presence
         tags = options[:tags].presence || []
         limit = options[:limit].presence
-
+        
+        
         begin 
           url_params = { 
             :collection_identifier => collection_identifier,
@@ -37,34 +38,22 @@ module Editmode
           raise "No response received" unless response.code == 200
           chunks = response["chunks"]
 
-          return chunks
+          response = []
+          if chunks.any?
+            chunks.each do |chunk|
+              @custom_field_chunk = chunk
+              response << yield
+            end
+          end
+          
+          
+          # return response.join
         rescue => error
           puts error 
           return []
         end
       end
-
       alias_method :c, :chunk_collection
-
-      def chunk_field_value(parent_chunk_object, custom_field_identifier, options = {})
-        begin 
-          chunk_identifier = parent_chunk_object["identifier"]
-          custom_field_item = parent_chunk_object["content"].detect {|f| f["custom_field_identifier"] == custom_field_identifier }
-        
-          if custom_field_item.present?
-            render_chunk_content(
-              custom_field_item["identifier"],
-              custom_field_item["content"],
-              custom_field_item["chunk_type"],
-              { parent_identifier: chunk_identifier }.merge(options)
-            )
-          end
-        rescue => errors
-          puts errors
-          content_tag(:span, "&nbsp".html_safe) 
-        end
-      
-      end
 
       def render_chunk_content(chunk_identifier, chunk_content, chunk_type,options = {})
 
@@ -147,19 +136,20 @@ module Editmode
           # maintain layout
           content_tag("em-span", "&nbsp".html_safe) 
         end
-
       end
+      alias_method :chunk, :chunk_display
+
+
+      def render_custom_field(label, options={})
+        chunk_field_value(@custom_field_chunk, label, options)
+      end
+      alias_method :F, :render_custom_field
 
       def render_chunk(identifier, options = {}, &block)
-        parent_chunk = options[:parent]
-        if parent_chunk.present?
-          return chunk_field_value(parent_chunk, identifier, options, &block)
-        end
         chunk_display('label', identifier, options, &block)
       end
-
       alias_method :E, :render_chunk
-      alias_method :chunk, :chunk_display
+
 
       def variable_parse!(content, variables, values)
         tokens = content.scan(/\{{(.*?)\}}/)
