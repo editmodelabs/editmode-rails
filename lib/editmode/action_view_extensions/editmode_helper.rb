@@ -20,7 +20,6 @@ module Editmode
         tags = options[:tags].presence || []
         limit = options[:limit].presence
         
-        
         begin 
           url_params = { 
             :collection_identifier => collection_identifier,
@@ -33,15 +32,27 @@ module Editmode
           url.path = '/chunks'
           url.query = url_params
 
-          response = HTTParty.get(url)
+          cache_identifier = "collection_#{collection_identifier}#{branch_id}#{limit}#{tags.join}"
+          cached_content_present = Rails.cache.exist?(cache_identifier)
+          
+          if !cached_content_present
+            response = HTTParty.get(url)
+            response_received = true if response.code == 200
+          end
+          
+          if !cached_content_present && !response_received
+            raise "No response received"
+          else
 
-          raise "No response received" unless response.code == 200
-          chunks = response["chunks"]
+            chunks = Rails.cache.fetch(cache_identifier) do  
+              response['chunks']
+            end
 
-          if chunks.any?
-            chunks.each do |chunk|
-              @custom_field_chunk = chunk
-              yield
+            if chunks.any?
+              chunks.each do |chunk|
+                @custom_field_chunk = chunk
+                yield
+              end
             end
           end
         rescue => error
