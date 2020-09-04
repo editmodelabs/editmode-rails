@@ -1,8 +1,10 @@
+require 'editmode/helper'
+
 module Editmode
   module ActionViewExtensions
     module EditmodeHelper
-
       require 'httparty'
+      include Editmode::Helper
 
       def api_version
         # Todo Add Header Version
@@ -12,12 +14,12 @@ module Editmode
         ENV["EDITMODE_OVERRIDE_API_URL"] || "https://api.editmode.com"
       end
 
-      def chunk_collection(collection_identifier, **options)
+      def chunk_collection(collection_identifier, **options, &block)
         branch_params = params[:em_branch_id].present? ? "branch_id=#{params[:em_branch_id]}" : ""
         branch_id = params[:em_branch_id].presence
         tags = options[:tags].presence || []
         limit = options[:limit].presence
-
+        
         begin 
           url_params = { 
             :collection_identifier => collection_identifier,
@@ -30,24 +32,43 @@ module Editmode
           url.path = '/chunks'
           url.query = url_params
 
-          response = HTTParty.get(url)
+          cache_identifier = "collection_#{collection_identifier}#{branch_id}#{limit}#{tags.join}"
+          cached_content_present = Rails.cache.exist?(cache_identifier)
+          
+          if !cached_content_present
+            response = HTTParty.get(url)
+            response_received = true if response.code == 200
+          end
+          
+          if !cached_content_present && !response_received
+            raise "No response received"
+          else
 
-          raise "No response received" unless response.code == 200
-          chunks = response["chunks"]
+            chunks = Rails.cache.fetch(cache_identifier) do  
+              response['chunks']
+            end
 
-          return chunks
+            if chunks.any?
+              content_tag :div, class: "chunks-collection-wrapper", data: {chunk_collection_identifier: collection_identifier} do
+                chunks.each do |chunk|
+                  @custom_field_chunk = chunk
+                  yield
+                end
+              end
+            end
+          end
         rescue => error
           puts error 
           return []
         end
       end
+      alias_method :c, :chunk_collection
 
-      def chunk_field_value(parent_chunk_object, custom_field_identifier,options={})
-
+      def chunk_field_value(parent_chunk_object, custom_field_identifier, options = {})
         begin 
           chunk_identifier = parent_chunk_object["identifier"]
-          custom_field_item = parent_chunk_object["content"].detect {|f| f["custom_field_identifier"] == custom_field_identifier }
-        
+          custom_field_item = parent_chunk_object["content"].detect {|f| f["custom_field_identifier"] == custom_field_identifier || f["custom_field_name"] == custom_field_identifier }
+          
           if custom_field_item.present?
             render_chunk_content(
               custom_field_item["identifier"],
@@ -60,10 +81,9 @@ module Editmode
           puts errors
           content_tag(:span, "&nbsp".html_safe) 
         end
-      
       end
 
-      def render_chunk_content(chunk_identifier,chunk_content,chunk_type,options={})
+      def render_chunk_content(chunk_identifier, chunk_content, chunk_type,options = {})
 
         begin 
           # Always sanitize the content!!
@@ -104,7 +124,7 @@ module Editmode
 
       end
 
-      def chunk_display(label,identifier,options={},&block)
+      def chunk_display(label, identifier, options = {}, &block)
         branch_id = params[:em_branch_id]
         # This method should never show an error. 
         # If anything goes wrong fetching content
@@ -113,7 +133,7 @@ module Editmode
         begin
           branch_params = branch_id.present? ? "branch_id=#{branch_id}" : ""
           cache_identifier = "chunk_#{identifier}#{branch_id}"
-          url = "#{api_root_url}/chunks/#{identifier}?#{branch_params}"
+          url = "#{api_root_url}/chunks/#{identifier}?project_id=#{Editmode.project_id}&#{branch_params}"
           cached_content_present = Rails.cache.exist?(cache_identifier)
 
           if !cached_content_present
@@ -144,10 +164,20 @@ module Editmode
           # maintain layout
           content_tag("em-span", "&nbsp".html_safe) 
         end
-
       end
-
       alias_method :chunk, :chunk_display
+
+
+      def render_custom_field(label, options={})
+        chunk_field_value(@custom_field_chunk, label, options)
+      end
+      alias_method :F, :render_custom_field
+
+      def render_chunk(identifier, options = {}, &block)
+        chunk_display('label', identifier, options, &block)
+      end
+      alias_method :E, :render_chunk
+
 
       def variable_parse!(content, variables, values)
         tokens = content.scan(/\{{(.*?)\}}/)

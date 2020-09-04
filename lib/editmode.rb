@@ -10,6 +10,7 @@ require 'editmode/engine' if defined?(Rails)
 module Editmode
   class << self
     include Editmode::ActionViewExtensions::EditmodeHelper
+    include Editmode::Helper
 
     def project_id=(id)
       config.project_id = id

@@ -11,7 +11,7 @@ module Editmode
     def initialize(identifier, **options)
       @identifier = identifier
       @branch_id = options[:branch_id].presence
-      @variable_values = options[:values].presence || {}
+      @variable_values = options[:variables].presence || {}
       get_content
     end
 
@@ -45,7 +45,7 @@ module Editmode
     private
     def get_content
       branch_params = branch_id.present? ? "branch_id=#{branch_id}" : ""
-      url = "#{api_root_url}/chunks/#{identifier}?#{branch_params}"
+      url = "#{api_root_url}/chunks/#{identifier}?project_id=#{Editmode.project_id}&#{branch_params}"
 
       cache_identifier = "chunk_value_#{identifier}#{branch_id}"
       cached_content_present = Rails.cache.exist?(cache_identifier)
