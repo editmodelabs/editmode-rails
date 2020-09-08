@@ -93,11 +93,9 @@ e("cnk_16e04a02d577afb610ce", "Email Content", values: variable_values)
 
 |Parameter|Type|Description|
 |---|---|---|
-| identifier | string | The first argument of `chunk_collection` takes the id of the collection you want to loop through |
-| limit | int |`optional` The number of collection item you want to display  |
+| identifier | string | The first argument of `c` takes the id of the collection you want to loop through |
+| limit | int |`optional` The number of collection items you want to display  |
 | tags | array |`optional` Filter collection items based on tags listed in this parameter  |
-| parent_object | object | The first argument of `chunk_field_value` takes the chunk object passed in from the `chunk_collection` loop |
-| field_id | string | The second argument of `chunk_field_value` takes the id of the collection field you want to reference |
 
 
 ## Caching
