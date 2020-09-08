@@ -62,7 +62,7 @@ This works when a chunk is part of a collection.
 @email_content = e("welcome_email","Content")
 ```
 
-##### Using variables
+### Working with variables
 ```ruby
 variable_values = { first_name: "Dexter", last_name: "Morgan"}
 
@@ -76,8 +76,6 @@ e("cnk_16e04a02d577afb610ce", "Email Content", values: variable_values)
 
 # Response: "Hi Dexter Morgan"
 ```
-[Read more about variables](core_concepts?id=variables)
-
 
 ### Use collections for repeatable content
 ```erb
