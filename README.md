@@ -33,36 +33,31 @@ end
 That's it, you're all set up. By default Editmode will now include editmode.js in every page of your rails application, unless you disable auto-include.
 <hr/>
 
-## Table of Contents
-- [Accessing chunk content in your application](#accessing-chunk-content-in-your-application)
-- [Caching](#caching)
-- [Disabling editmode.js auto-include](#disabling-editmodejs-auto-include)
-
 ## Rendering Content
 
 Editmode provides helper methods for use in your rails views and controllers.
 
 ### Render the content of a chunk
-```
+```erb
 <%= e('cnk_x4ts............') %> # Using a chunk identifier
 <%= e('marketing_page_headline') %> # Using a content key 
 ```
 
 ### Render an *Editable* chunk. Wait, [what?](https://editmode.com/rails) 
-```
+```erb
 <%= E('cnk_x4ts............') %> # Using a chunk identifier
 <%= E('marketing_page_headline') %> # Using a content key
 ```
 
 ### Content can also be accessed in Controllers
-```
+```ruby
 @page_title = e("cnk_x4ts............")  # Using a chunk identifier
 @page_title = e("marketing_page_seo_title") # Using a content key
 ```
 
 ### Directly get the value of a custom field
 This works when a chunk is part of a collection.
-```
+```ruby
 @email_subject = e("welcome_email","Subject")
 @email_content = e("welcome_email","Content")
 ```
@@ -85,7 +80,7 @@ e("cnk_16e04a02d577afb610ce", "Email Content", values: variable_values)
 
 
 ### Use collections for repeatable content
-```
+```erb
 <% c('col_j8fbs...', :limit => 10, :tags => ['US']) do |chunk| %>
   <div class="user-profile">
     <h3 class="name">
