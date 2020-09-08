@@ -5,7 +5,7 @@
 
 # EditMode for Rails
 
-Editmode is a smarter way to manage copy and other content in your rails app. It's syntax is similar to i18n, but it's built for copy updates, not internationalization (yet). It allows you store content outside your codebase
+Editmode is a smarter way to manage copy and other content in your rails app. It's syntax is similar to i18n, but it's built for copy updates, not internationalization (yet). It's built around the idea of moving your content out of your codebase.
 
 ## Installation
 
