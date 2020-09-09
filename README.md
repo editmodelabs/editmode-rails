@@ -69,10 +69,10 @@ variable_values = { first_name: "Dexter", last_name: "Morgan"}
 # Assume chunk content is "Hi {{first_name}} {{last_name}}"
 
 # Single Chunk with Variables
-e("cnk_d36415052285997e079b", values: variable_values)
+e("cnk_d36415052285997e079b", variables: variable_values)
 
 # Collection Field with Variables
-e("cnk_16e04a02d577afb610ce", "Email Content", values: variable_values)
+e("cnk_16e04a02d577afb610ce", "Email Content", variables: variable_values)
 
 # Response: "Hi Dexter Morgan"
 ```
