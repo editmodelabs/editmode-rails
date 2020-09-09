@@ -49,12 +49,21 @@ module Editmode
             end
 
             if chunks.any?
+
               content_tag :div, class: "chunks-collection-wrapper", data: {chunk_collection_identifier: collection_identifier} do
                 chunks.each do |chunk|
                   @custom_field_chunk = chunk
-                  yield
+                  concat(content_tag(:div, class: "chunks-collection-item--wrapper") do
+                    yield
+                  end)
                 end
-              end
+
+                # Placeholder element for new collection item
+                @custom_field_chunk = chunks.first.merge!({placeholder: true})
+                concat(content_tag(:div, class: "chunks-hide chunks-col-placeholder-wrapper") do
+                  yield
+                end)
+              end 
             end
           end
         rescue => error
@@ -69,12 +78,17 @@ module Editmode
           chunk_identifier = parent_chunk_object["identifier"]
           custom_field_item = parent_chunk_object["content"].detect {|f| f["custom_field_identifier"] == custom_field_identifier || f["custom_field_name"] == custom_field_identifier }
           
+          if parent_chunk_object[:placeholder]
+            custom_field_item["identifier"] = ""
+            custom_field_item["content"] = ""
+          end
+
           if custom_field_item.present?
             render_chunk_content(
               custom_field_item["identifier"],
               custom_field_item["content"],
               custom_field_item["chunk_type"],
-              { parent_identifier: chunk_identifier }.merge(options)
+              { parent_identifier: chunk_identifier, custom_field_identifier:  custom_field_identifier}.merge(options)
             )
           end
         rescue => errors
@@ -99,9 +113,8 @@ module Editmode
 
           chunk_data = { :chunk => chunk_identifier, :chunk_editable => false, :chunk_type => chunk_type }
 
-          if options[:parent_identifier].present?
-            chunk_data.merge!({parent_identifier: options[:parent_identifier]})
-          end
+          chunk_data.merge!({parent_identifier: options[:parent_identifier]}) if options[:parent_identifier].present?
+          chunk_data.merge!({custom_field_identifier: options[:custom_field_identifier]}) if options[:custom_field_identifier].present?
 
           case display_type
           when "span"
@@ -115,6 +128,7 @@ module Editmode
               end
             end
           when "image"
+            chunk_content = chunk_content.blank? || chunk_content == "/images/original/missing.png" ? 'http://lvh.me:3001/upload.png' : chunk_content
             image_tag(chunk_content, :data => chunk_data, :class => css_class) 
           end
         rescue => errors
@@ -168,7 +182,7 @@ module Editmode
       alias_method :chunk, :chunk_display
 
 
-      def render_custom_field(label, options={})
+      def render_custom_field(label, options={})        
         chunk_field_value(@custom_field_chunk, label, options)
       end
       alias_method :F, :render_custom_field
