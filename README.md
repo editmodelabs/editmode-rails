@@ -79,7 +79,7 @@ e("cnk_16e04a02d577afb610ce", "Email Content", variables: variable_values)
 
 ### Use collections for repeatable content
 ```erb
-<% c('col_j8fbs...', :limit => 10, :tags => ['US']) do |chunk| %>
+<%= c('col_j8fbs...') do |chunk| %>
   <div class="user-profile">
     <h3 class="name">
       <%= F("Name") %>
