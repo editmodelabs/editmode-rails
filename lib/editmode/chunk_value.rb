@@ -3,9 +3,9 @@ module Editmode
     include Editmode::ActionViewExtensions::EditmodeHelper
 
     attr_accessor :identifier, :variable_values, :branch_id, 
-                  :variable_fallbacks, :chunk_type, :project_id, 
+                  :variable_fallbacks, :chunk_type, :project_id,
                   :response
-
+                  
     attr_writer :content
 
     def initialize(identifier, **options)
@@ -43,6 +43,14 @@ module Editmode
     end
 
     private
+
+    def json?(json)
+      JSON.parse(json)
+      return true
+    rescue JSON::ParserError => e
+      return false
+    end
+
     def get_content
       branch_params = branch_id.present? ? "branch_id=#{branch_id}" : ""
       url = "#{api_root_url}/chunks/#{identifier}?project_id=#{Editmode.project_id}&#{branch_params}"
@@ -58,16 +66,16 @@ module Editmode
       if !cached_content_present && !response_received
         raise no_response_received(identifier)
       else
-        @response = Rails.cache.fetch(cache_identifier) do
-          http_response
+        cached_response = Rails.cache.fetch(cache_identifier) do
+          http_response.to_json
         end
+
+        @response = json?(cached_response) ? JSON.parse(cached_response) : cached_response
 
         @content = response['content']
         @chunk_type = response['chunk_type']
         @project_id = response['project_id']
-        @variable_fallbacks = Rails.cache.fetch("chunk_#{project_id}_variables") do
-          response['variable_fallbacks']
-        end
+        @variable_fallbacks = response['variable_fallbacks']
       end      
     end
 

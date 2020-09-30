@@ -76,7 +76,11 @@ module Editmode
       def chunk_field_value(parent_chunk_object, custom_field_identifier, options = {})
         begin 
           chunk_identifier = parent_chunk_object["identifier"]
-          custom_field_item = parent_chunk_object["content"].detect {|f| f["custom_field_identifier"] == custom_field_identifier || f["custom_field_name"] == custom_field_identifier }
+          custom_field_item = parent_chunk_object["content"].detect do |f|
+            f["custom_field_identifier"].try(:downcase) == custom_field_identifier.try(:downcase)  || f["custom_field_name"].try(:downcase)  == custom_field_identifier.try(:downcase)
+          end
+
+          options[:field] = custom_field_identifier
           
           if parent_chunk_object[:placeholder]
             custom_field_item["identifier"] = ""
@@ -102,6 +106,7 @@ module Editmode
         begin 
           # Always sanitize the content!!
           chunk_content = ActionController::Base.helpers.sanitize(chunk_content) unless chunk_type == 'rich_text'
+          chunk_content = variable_parse!(chunk_content, options[:variable_fallbacks], options[:variable_values])
 
           css_class = options[:class]
 
@@ -146,10 +151,11 @@ module Editmode
         # prevent the page from loading.
         begin
           branch_params = branch_id.present? ? "branch_id=#{branch_id}" : ""
-          cache_identifier = "chunk_#{identifier}#{branch_id}"
+          field = options[:field].presence || ""          
+          cache_identifier = "chunk_#{identifier}#{branch_id}#{field}"
           url = "#{api_root_url}/chunks/#{identifier}?project_id=#{Editmode.project_id}&#{branch_params}"
           cached_content_present = Rails.cache.exist?(cache_identifier)
-
+          
           if !cached_content_present
             response = HTTParty.get(url)
             response_received = true if response.code == 200
@@ -158,15 +164,30 @@ module Editmode
           if !cached_content_present && !response_received
             raise "No response received"
           else
-            
+            if field.present? && response.present?
+              field_content = response["content"].detect {|f| f["custom_field_identifier"].downcase == field.downcase || f["custom_field_name"].downcase == field.downcase }
+              if field_content
+                content = field_content["content"]
+                type = field_content["chunk_type"]
+                identifier = field_content["identifier"]
+              end
+            end
+
+            variable_fallbacks = Rails.cache.fetch("#{cache_identifier}_variables") do
+              response['variable_fallbacks'].presence || {}
+            end
+
             chunk_content = Rails.cache.fetch(cache_identifier) do  
-              response['content']
+              content.presence || response["content"]
             end
 
             chunk_type = Rails.cache.fetch("#{cache_identifier}_type") do  
-              response['chunk_type']
+              type.presence || response['chunk_type']
             end
 
+            options[:variable_fallbacks] = variable_fallbacks
+            options[:variable_values] = options[:variables]
+            
             render_chunk_content(identifier,chunk_content,chunk_type, options)
 
           end
@@ -182,18 +203,23 @@ module Editmode
       alias_method :chunk, :chunk_display
 
 
-      def render_custom_field(label, options={})        
-        chunk_field_value(@custom_field_chunk, label, options)
+      def render_custom_field(field_name, options={})
+        options[:variable_fallbacks] = @custom_field_chunk["variable_fallbacks"] || {}
+        options[:variable_values] = options[:variables] || {}
+        
+        chunk_field_value(@custom_field_chunk, field_name, options)
       end
       alias_method :F, :render_custom_field
 
-      def render_chunk(identifier, options = {}, &block)
+      def render_chunk(identifier, *args, &block)
+        field, options = parse_arguments(args)
+        options[:field] = field
         chunk_display('label', identifier, options, &block)
       end
       alias_method :E, :render_chunk
 
 
-      def variable_parse!(content, variables, values)
+      def variable_parse!(content, variables = {}, values = {})
         tokens = content.scan(/\{{(.*?)\}}/)
         if tokens.any?
           tokens.flatten! 
