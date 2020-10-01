@@ -49,7 +49,6 @@ module Editmode
             end
 
             if chunks.any?
-
               content_tag :div, class: "chunks-collection-wrapper", data: {chunk_collection_identifier: collection_identifier} do
                 chunks.each do |chunk|
                   @custom_field_chunk = chunk
@@ -64,6 +63,8 @@ module Editmode
                   yield
                 end)
               end 
+            else
+              content_tag(:span, "&nbsp".html_safe)
             end
           end
         rescue => error
