@@ -134,7 +134,7 @@ module Editmode
               end
             end
           when "image"
-            chunk_content = chunk_content.blank? || chunk_content == "/images/original/missing.png" ? 'http://lvh.me:3001/upload.png' : chunk_content
+            chunk_content = chunk_content.blank? || chunk_content == "/images/original/missing.png" ? 'https://www.editmode.com/upload.png' : chunk_content
             image_tag(chunk_content, :data => chunk_data, :class => css_class) 
           end
         rescue => errors
