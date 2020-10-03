@@ -19,6 +19,9 @@ module Editmode
         branch_id = params[:em_branch_id].presence
         tags = options[:tags].presence || []
         limit = options[:limit].presence
+
+        parent_class = options[:class] || ""
+        item_class = options[:item_class] || ""
         
         begin 
           url_params = { 
@@ -49,10 +52,10 @@ module Editmode
             end
 
             if chunks.any?
-              content_tag :div, class: "chunks-collection-wrapper", data: {chunk_collection_identifier: collection_identifier} do
+              content_tag :div, class: "chunks-collection-wrapper #{parent_class}", data: {chunk_collection_identifier: collection_identifier} do
                 chunks.each do |chunk|
                   @custom_field_chunk = chunk
-                  concat(content_tag(:div, class: "chunks-collection-item--wrapper") do
+                  concat(content_tag(:div, class: "chunks-collection-item--wrapper #{item_class}") do
                     yield
                   end)
                 end
