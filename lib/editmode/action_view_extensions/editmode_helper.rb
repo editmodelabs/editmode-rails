@@ -190,7 +190,7 @@ module Editmode
             end
 
             options[:variable_fallbacks] = variable_fallbacks
-            options[:variable_values] = options[:variables]
+            options[:variable_values] = options[:variables].presence || {}
             
             render_chunk_content(identifier,chunk_content,chunk_type, options)
 
