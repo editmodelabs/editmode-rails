@@ -94,8 +94,10 @@ e("cnk_16e04a02d577afb610ce", "Email Content", variables: variable_values)
 |Parameter|Type|Description|
 |---|---|---|
 | identifier | string | The first argument of `c` takes the id of the collection you want to loop through |
-| limit | int |`optional` The number of collection items you want to display  |
+| limit | int/string |`optional` The number of collection items you want to display  |
 | tags | array |`optional` Filter collection items based on tags listed in this parameter  |
+| class | string | `optional` Class name(s) that will be added along with "chunks-collection-wrapper" to the main collection `<div>` element |
+| item_class | string | `optional` Class name(s) that will be added along with "chunks-collection-item--wrapper" to all collection items |
 
 
 ## Caching
