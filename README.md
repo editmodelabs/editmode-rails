@@ -47,6 +47,7 @@ Editmode provides helper methods for use in your rails views and controllers.
 ```erb
 <%= E('cnk_x4ts............') %> # Using a chunk identifier
 <%= E('marketing_page_headline') %> # Using a content key
+<%= E('cnk_x4ts...', class: "a-css-class") %> # Render a chunk with inline css class 
 ```
 
 ### Content can also be accessed in Controllers
@@ -79,15 +80,13 @@ e("cnk_16e04a02d577afb610ce", "Email Content", variables: variable_values)
 
 ### Use collections for repeatable content
 ```erb
-<%= c('col_j8fbs...') do |chunk| %>
-  <div class="user-profile">
-    <h3 class="name">
-      <%= F("Name") %>
-    </h3>
-    <p class="description">
-      <%= f("Description") %>
-    </p>
-  </div>
+<%= c('col_j8fbs...', class: "profiles-container", item_class: "profile-item") do %>
+  <h3 class="name">
+    <%= F("Name", class: "profile-name") %>
+  </h3>
+  <p class="description">
+    <%= f("Description"), class: "profile-description" %>
+  </p>
 <% end %>
 ```
 
