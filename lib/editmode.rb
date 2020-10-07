@@ -36,7 +36,7 @@ module Editmode
       begin
         Editmode::ChunkValue.new(identifier, **options )
       rescue => er
-        raise er
+        puts er
       end
     end
   end

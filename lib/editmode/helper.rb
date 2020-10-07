@@ -12,7 +12,7 @@ module Editmode
           chunk.content
         end 
       rescue => er
-        raise er
+        puts er
       end
     end
 
