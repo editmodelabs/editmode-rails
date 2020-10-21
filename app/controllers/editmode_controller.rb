@@ -13,8 +13,7 @@ class EditmodeController < ApplicationController
       Rails.cache.delete("chunk_#{project_id}_variables")
       render status: 200, json: {:response => "success"}
     elsif params[:identifier]
-      Rails.cache.delete("chunk_#{params[:identifier]}")
-      Rails.cache.delete("chunk_#{params[:identifier]}_type")
+      Rails.cache.delete_matched("#{params[:identifier]}")
       render status: 200, json: {:response => "success"}
     else
       render status: 404, json: {:response => "no identifier specified"}

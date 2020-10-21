@@ -113,6 +113,7 @@ module Editmode
           chunk_content = variable_parse!(chunk_content, options[:variable_fallbacks], options[:variable_values])
 
           css_class = options[:class]
+          cache_id = options[:cache_identifier]
 
           if chunk_type == "image"
             display_type = "image"
@@ -124,6 +125,7 @@ module Editmode
 
           chunk_data.merge!({parent_identifier: options[:parent_identifier]}) if options[:parent_identifier].present?
           chunk_data.merge!({custom_field_identifier: options[:custom_field_identifier]}) if options[:custom_field_identifier].present?
+          chunk_data.merge!({chunk_cache_id: cache_id}) if cache_id.present?
 
           case display_type
           when "span"
@@ -159,7 +161,8 @@ module Editmode
           cache_identifier = "chunk_#{identifier}#{branch_id}#{field}"
           url = "#{api_root_url}/chunks/#{identifier}?project_id=#{Editmode.project_id}&#{branch_params}"
           cached_content_present = Rails.cache.exist?(cache_identifier)
-          
+          parent_identifier = identifier if field.present?
+
           if !cached_content_present
             response = HTTParty.get(url)
             response_received = true if response.code == 200
@@ -173,7 +176,9 @@ module Editmode
               if field_content
                 content = field_content["content"]
                 type = field_content["chunk_type"]
-                identifier = field_content["identifier"]
+                identifier = Rails.cache.fetch("#{cache_identifier}_field_identifier") do
+                  field_content["identifier"]
+                end
               end
             end
 
@@ -189,11 +194,16 @@ module Editmode
               type.presence || response['chunk_type']
             end
 
+            identifier = Rails.cache.fetch("#{cache_identifier}_field_identifier") do
+              identifier
+            end
+
             options[:variable_fallbacks] = variable_fallbacks
             options[:variable_values] = options[:variables].presence || {}
             
+            options[:cache_identifier] =  parent_identifier.presence || identifier
+            
             render_chunk_content(identifier,chunk_content,chunk_type, options)
-
           end
 
         rescue => error
