@@ -5,7 +5,7 @@ module Editmode
       field, options = parse_arguments(args)
       begin
         chunk = Editmode::ChunkValue.new(identifier, options)
-        
+
         if chunk.chunk_type == 'collection_item'
           chunk.field(field)
         else

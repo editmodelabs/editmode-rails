@@ -15,7 +15,7 @@ module Editmode
       get_content
     end
 
-    def field(field = nil)
+    def field(field = nil)      
       # Field ID can be a slug or field_name
       if chunk_type == 'collection_item'
         if field.present?
@@ -75,7 +75,7 @@ module Editmode
         @content = response['content']
         @chunk_type = response['chunk_type']
         @project_id = response['project_id']
-        @variable_fallbacks = response['variable_fallbacks']
+        @variable_fallbacks = response['variable_fallbacks'].presence || {}
       end      
     end
 
