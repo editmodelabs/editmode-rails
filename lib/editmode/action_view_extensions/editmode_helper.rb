@@ -135,7 +135,7 @@ module Editmode
               end
             else
               content_tag("em-span", :class => css_class, :data => chunk_data.merge!({:chunk_editable => true}) ) do
-                chunk_content
+                chunk_content.html_safe
               end
             end
           when "image"
@@ -162,7 +162,6 @@ module Editmode
           url = "#{api_root_url}/chunks/#{identifier}?project_id=#{Editmode.project_id}&#{branch_params}"
           cached_content_present = Rails.cache.exist?(cache_identifier)
           parent_identifier = identifier if field.present?
-
           if !cached_content_present
             response = HTTParty.get(url)
             response_received = true if response.code == 200
@@ -233,7 +232,7 @@ module Editmode
       alias_method :E, :render_chunk
 
 
-      def variable_parse!(content, variables = {}, values = {})
+      def variable_parse!(content, variables = {}, values = {}, raw = false)
         tokens = content.scan(/\{{(.*?)\}}/)
         if tokens.any?
           tokens.flatten! 
@@ -241,6 +240,12 @@ module Editmode
             token_value = values[token.to_sym] || variables[token] || ""
             sanitized_value = ActionController::Base.helpers.sanitize(token_value)
 
+            unless raw
+              sanitized_value = content_tag("em-var", :data => {chunk_variable: token, chunk_variable_value: sanitized_value}) do
+                sanitized_value
+              end
+            end
+            
             content.gsub!("{{#{token}}}", sanitized_value)
           end
         end

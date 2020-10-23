@@ -23,7 +23,7 @@ module Editmode
           field_content = @content.detect {|f| f["custom_field_identifier"].downcase == field || f["custom_field_name"].downcase == field }
           if field_content.present?
             result = field_content['content']
-            result = variable_parse!(result, variable_fallbacks, variable_values)
+            result = variable_parse!(result, variable_fallbacks, variable_values, true)
           else
             raise no_response_received(field)
           end
@@ -33,13 +33,15 @@ module Editmode
       else
         raise "undefined method 'field` for chunk_type: #{chunk_type} \n"
       end
-      result || @content
+      result ||= @content
+      result.try(:html_safe)
     end
 
     def content
       raise "undefined method 'content` for chunk_type: collection_item \nDid you mean? field" if chunk_type == 'collection_item'
       
-      variable_parse!(@content, variable_fallbacks, variable_values)
+      result = variable_parse!(@content, variable_fallbacks, variable_values, true)
+      result.try(:html_safe)
     end
 
     private
