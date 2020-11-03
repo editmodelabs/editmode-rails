@@ -110,7 +110,6 @@ module Editmode
         begin 
           # Always sanitize the content!!
           chunk_content = ActionController::Base.helpers.sanitize(chunk_content) unless chunk_type == 'rich_text'
-          chunk_content = variable_parse!(chunk_content, options[:variable_fallbacks], options[:variable_values])
 
           css_class = options[:class]
           cache_id = options[:cache_identifier]
@@ -150,60 +149,29 @@ module Editmode
       end
 
       def chunk_display(label, identifier, options = {}, &block)
-        branch_id = params[:em_branch_id]
+        options[:branch_id] = params[:em_branch_id] if params[:em_branch_id].present?
         # This method should never show an error. 
         # If anything goes wrong fetching content
         # We should just show blank content, not
         # prevent the page from loading.
         begin
-          branch_params = branch_id.present? ? "branch_id=#{branch_id}" : ""
           field = options[:field].presence || ""          
-          cache_identifier = "chunk_#{identifier}#{branch_id}#{field}"
-          url = "#{api_root_url}/chunks/#{identifier}?project_id=#{Editmode.project_id}&#{branch_params}"
-          cached_content_present = Rails.cache.exist?(cache_identifier)
           parent_identifier = identifier if field.present?
-          if !cached_content_present
-            response = HTTParty.get(url)
-            response_received = true if response.code == 200
-          end
 
-          if !cached_content_present && !response_received
-            raise "No response received"
+          chunk_value = Editmode::ChunkValue.new(identifier, options)
+          
+          if field.present? && chunk_value.chunk_type == 'collection_item'
+            chunk_content = chunk_value.field(field)
+            identifier = chunk_value.field_chunk(field)["identifier"]
+            chunk_type = chunk_value.field_chunk(field)["chunk_type"]
           else
-            if field.present? && response.present?
-              field_content = response["content"].detect {|f| f["custom_field_identifier"].downcase == field.downcase || f["custom_field_name"].downcase == field.downcase }
-              if field_content
-                content = field_content["content"]
-                type = field_content["chunk_type"]
-                identifier = Rails.cache.fetch("#{cache_identifier}_field_identifier") do
-                  field_content["identifier"]
-                end
-              end
-            end
-
-            variable_fallbacks = Rails.cache.fetch("#{cache_identifier}_variables") do
-              response['variable_fallbacks'].presence || {}
-            end
-
-            chunk_content = Rails.cache.fetch(cache_identifier) do  
-              content.presence || response["content"]
-            end
-
-            chunk_type = Rails.cache.fetch("#{cache_identifier}_type") do  
-              type.presence || response['chunk_type']
-            end
-
-            identifier = Rails.cache.fetch("#{cache_identifier}_field_identifier") do
-              identifier
-            end
-
-            options[:variable_fallbacks] = variable_fallbacks
-            options[:variable_values] = options[:variables].presence || {}
-            
-            options[:cache_identifier] =  parent_identifier.presence || identifier
-            
-            render_chunk_content(identifier,chunk_content,chunk_type, options)
+            chunk_content = chunk_value.content
+            chunk_type = chunk_value.chunk_type
           end
+
+          options[:cache_identifier] =  parent_identifier.presence || identifier
+          
+          render_chunk_content(identifier, chunk_content, chunk_type, options)
 
         rescue => error
           # Show fallback content by default

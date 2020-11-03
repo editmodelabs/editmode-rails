@@ -4,7 +4,7 @@ module Editmode
 
     attr_accessor :identifier, :variable_values, :branch_id, 
                   :variable_fallbacks, :chunk_type, :project_id,
-                  :response
+                  :response, :cache_identifier
                   
     attr_writer :content
 
@@ -19,10 +19,9 @@ module Editmode
       # Field ID can be a slug or field_name
       if chunk_type == 'collection_item'
         if field.present?
-          field.downcase!
-          field_content = @content.detect {|f| f["custom_field_identifier"].downcase == field || f["custom_field_name"].downcase == field }
-          if field_content.present?
-            result = field_content['content']
+          field_chunk = field_chunk(field)
+          if field_chunk.present?
+            result = field_chunk['content']
             result = variable_parse!(result, variable_fallbacks, variable_values, true)
           else
             raise no_response_received(field)
@@ -35,6 +34,11 @@ module Editmode
       end
       result ||= @content
       result.try(:html_safe)
+    end
+
+    def field_chunk(field)
+      field.downcase!
+      @content.detect {|f| f["custom_field_identifier"].downcase == field || f["custom_field_name"].downcase == field }
     end
 
     def content
@@ -55,9 +59,10 @@ module Editmode
 
     def get_content
       branch_params = branch_id.present? ? "branch_id=#{branch_id}" : ""
-      url = "#{api_root_url}/chunks/#{identifier}?project_id=#{Editmode.project_id}&#{branch_params}"
+      project_id = Editmode.project_id
+      url = "#{api_root_url}/chunks/#{identifier}?project_id=#{project_id}&#{branch_params}"
 
-      cache_identifier = "chunk_value_#{identifier}#{branch_id}"
+      @cache_identifier = "chunk_#{project_id}#{branch_id}#{identifier}"
       cached_content_present = Rails.cache.exist?(cache_identifier)
 
       if !cached_content_present
