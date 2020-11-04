@@ -4,7 +4,7 @@ module Editmode
     def e(identifier, *args)
       field, options = parse_arguments(args)
       begin
-        chunk = Editmode::ChunkValue.new(identifier, options)
+        chunk = Editmode::ChunkValue.new(identifier, options.merge({raw: true}))
 
         if chunk.chunk_type == 'collection_item'
           chunk.field(field)
@@ -17,7 +17,7 @@ module Editmode
     end
 
     def render_custom_field_raw(label, options={})
-      e(@custom_field_chunk["identifier"], label, options)
+      e(@custom_field_chunk["identifier"], label, options.merge({response: @custom_field_chunk}))
     end
     alias_method :f, :render_custom_field_raw
 

@@ -1,18 +1,31 @@
 module Editmode
   class ChunkValue
-    include Editmode::ActionViewExtensions::EditmodeHelper
+    include ActionView::Helpers::TagHelper
+    include ActionView::Context
 
     attr_accessor :identifier, :variable_values, :branch_id, 
                   :variable_fallbacks, :chunk_type, :project_id,
-                  :response, :cache_identifier
+                  :response, :cache_identifier, :url, :collection_id
                   
     attr_writer :content
 
     def initialize(identifier, **options)
       @identifier = identifier
       @branch_id = options[:branch_id].presence
+      @project_id = Editmode.project_id
       @variable_values = options[:variables].presence || {}
-      get_content
+      @raw = options[:raw].present?
+
+      branch_params = branch_id.present? ? "branch_id=#{branch_id}" : ""
+      @url = "#{api_root_url}/chunks/#{identifier}?project_id=#{project_id}&#{branch_params}"
+      @cache_identifier = "chunk_#{project_id}#{branch_id}#{identifier}"
+
+      if options[:response].present?
+        @response = options[:response]
+        set_response_attributes!
+      else
+        get_content
+      end
     end
 
     def field(field = nil)      
@@ -22,7 +35,7 @@ module Editmode
           field_chunk = field_chunk(field)
           if field_chunk.present?
             result = field_chunk['content']
-            result = variable_parse!(result, variable_fallbacks, variable_values, true)
+            result = variable_parse!(result, variable_fallbacks, variable_values, @raw)
           else
             raise no_response_received(field)
           end
@@ -44,11 +57,15 @@ module Editmode
     def content
       raise "undefined method 'content` for chunk_type: collection_item \nDid you mean? field" if chunk_type == 'collection_item'
       
-      result = variable_parse!(@content, variable_fallbacks, variable_values, true)
+      result = variable_parse!(@content, variable_fallbacks, variable_values, @raw)
       result.try(:html_safe)
     end
 
     private
+    # Todo: Transfer to helper utils
+    def api_root_url
+      ENV["EDITMODE_OVERRIDE_API_URL"] || "https://api.editmode.com"
+    end
 
     def json?(json)
       JSON.parse(json)
@@ -57,20 +74,39 @@ module Editmode
       return false
     end
 
+    def variable_parse!(content, variables = {}, values = {}, raw = true)
+      content = ActionController::Base.helpers.sanitize(content)
+      tokens = content.scan(/\{{(.*?)\}}/)
+      if tokens.any?
+        tokens.flatten! 
+        tokens.each do |token|
+          token_value = values[token.to_sym] || variables[token] || ""
+          sanitized_value = ActionController::Base.helpers.sanitize(token_value)
+
+          unless raw
+            sanitized_value = content_tag("em-var", :data => {chunk_variable: token, chunk_variable_value: sanitized_value}) do
+              sanitized_value
+            end
+          end
+          
+          content.gsub!("{{#{token}}}", sanitized_value)
+        end
+      end
+
+      content
+    end
+
+    def cached?
+      Rails.cache.exist?(cache_identifier)
+    end
+
     def get_content
-      branch_params = branch_id.present? ? "branch_id=#{branch_id}" : ""
-      project_id = Editmode.project_id
-      url = "#{api_root_url}/chunks/#{identifier}?project_id=#{project_id}&#{branch_params}"
-
-      @cache_identifier = "chunk_#{project_id}#{branch_id}#{identifier}"
-      cached_content_present = Rails.cache.exist?(cache_identifier)
-
-      if !cached_content_present
+      if !cached?
         http_response = HTTParty.get(url)
         response_received = true if http_response.code == 200
       end
 
-      if !cached_content_present && !response_received
+      if !cached? && !response_received
         raise no_response_received(identifier)
       else
         cached_response = Rails.cache.fetch(cache_identifier) do
@@ -78,12 +114,15 @@ module Editmode
         end
 
         @response = json?(cached_response) ? JSON.parse(cached_response) : cached_response
-
-        @content = response['content']
-        @chunk_type = response['chunk_type']
-        @project_id = response['project_id']
-        @variable_fallbacks = response['variable_fallbacks'].presence || {}
+        set_response_attributes!
       end      
+    end
+
+    def set_response_attributes!
+      @content = response['content']
+      @chunk_type = response['chunk_type']
+      @variable_fallbacks = response['variable_fallbacks'].presence || {}
+      @collection_id = response["collection"]["identifier"]
     end
 
   end
