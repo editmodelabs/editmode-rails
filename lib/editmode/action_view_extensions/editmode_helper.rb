@@ -121,6 +121,7 @@ module Editmode
           chunk_data.merge!({custom_field_identifier: options[:custom_field_identifier]}) if options[:custom_field_identifier].present?
           chunk_data.merge!({chunk_cache_id: cache_id}) if cache_id.present?
           chunk_data.merge!({chunk_collection_identifier: options[:collection_id]}) if options[:collection_id].present?
+          chunk_data.merge!({chunk_content_key: options[:content_key]}) if options[:content_key].present?
 
           case display_type
           when "span"
@@ -152,7 +153,6 @@ module Editmode
         # prevent the page from loading.
         begin
           field = options[:field].presence || ""          
-          parent_identifier = identifier if field.present?
 
           chunk_value = Editmode::ChunkValue.new(identifier, options)
           
@@ -164,10 +164,11 @@ module Editmode
           else
             chunk_content = chunk_value.content
             chunk_type = chunk_value.chunk_type
+            identifier = chunk_value.response["identifier"] unless identifier.include? "cnk_"
           end
 
-          options[:cache_identifier] =  parent_identifier.presence || identifier
-          
+          options[:cache_identifier] = chunk_value.identifier
+          options[:content_key] = chunk_value.response.try(:[], "content_key")
           render_chunk_content(identifier, chunk_content, chunk_type, options)
 
         rescue => error

@@ -5,8 +5,9 @@ module Editmode
 
     attr_accessor :identifier, :variable_values, :branch_id, 
                   :variable_fallbacks, :chunk_type, :project_id,
-                  :response, :cache_identifier, :url, :collection_id
-                  
+                  :url, :collection_id, :cache_identifier,
+                  :response
+
     attr_writer :content
 
     def initialize(identifier, **options)
@@ -18,7 +19,7 @@ module Editmode
 
       branch_params = branch_id.present? ? "branch_id=#{branch_id}" : ""
       @url = "#{api_root_url}/chunks/#{identifier}?project_id=#{project_id}&#{branch_params}"
-      @cache_identifier = "chunk_#{project_id}#{branch_id}#{identifier}"
+      @cache_identifier = set_cache_identifier(identifier)
 
       if options[:response].present?
         @response = options[:response]
@@ -65,6 +66,10 @@ module Editmode
     # Todo: Transfer to helper utils
     def api_root_url
       ENV["EDITMODE_OVERRIDE_API_URL"] || "https://api.editmode.com"
+    end
+
+    def set_cache_identifier(id)
+      "chunk_#{project_id}#{branch_id}#{id}"
     end
 
     def json?(json)
@@ -115,14 +120,14 @@ module Editmode
 
         @response = json?(cached_response) ? JSON.parse(cached_response) : cached_response
         set_response_attributes!
-      end      
+      end
     end
 
     def set_response_attributes!
       @content = response['content']
       @chunk_type = response['chunk_type']
       @variable_fallbacks = response['variable_fallbacks'].presence || {}
-      @collection_id = response["collection"]["identifier"]
+      @collection_id = response["collection"]["identifier"] if chunk_type == 'collection_item'
     end
 
   end
