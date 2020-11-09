@@ -80,9 +80,8 @@ module Editmode
       def chunk_field_value(parent_chunk_object, custom_field_identifier, options = {})
         begin 
           chunk_identifier = parent_chunk_object["identifier"]
-          custom_field_item = parent_chunk_object["content"].detect do |f|
-            f["custom_field_identifier"].try(:downcase) == custom_field_identifier.try(:downcase)  || f["custom_field_name"].try(:downcase)  == custom_field_identifier.try(:downcase)
-          end
+          chunk_value = Editmode::ChunkValue.new(parent_chunk_object["identifier"], options.merge({response: parent_chunk_object}))
+          custom_field_item = chunk_value.field_chunk(custom_field_identifier)
 
           options[:field] = custom_field_identifier
           
@@ -94,7 +93,7 @@ module Editmode
           if custom_field_item.present?
             render_chunk_content(
               custom_field_item["identifier"],
-              custom_field_item["content"],
+              chunk_value.field(custom_field_identifier),
               custom_field_item["chunk_type"],
               { parent_identifier: chunk_identifier, custom_field_identifier:  custom_field_identifier}.merge(options)
             )
@@ -106,12 +105,7 @@ module Editmode
       end
 
       def render_chunk_content(chunk_identifier, chunk_content, chunk_type,options = {})
-
         begin 
-          # Always sanitize the content!!
-          chunk_content = ActionController::Base.helpers.sanitize(chunk_content) unless chunk_type == 'rich_text'
-          chunk_content = variable_parse!(chunk_content, options[:variable_fallbacks], options[:variable_values])
-
           css_class = options[:class]
           cache_id = options[:cache_identifier]
 
@@ -126,6 +120,8 @@ module Editmode
           chunk_data.merge!({parent_identifier: options[:parent_identifier]}) if options[:parent_identifier].present?
           chunk_data.merge!({custom_field_identifier: options[:custom_field_identifier]}) if options[:custom_field_identifier].present?
           chunk_data.merge!({chunk_cache_id: cache_id}) if cache_id.present?
+          chunk_data.merge!({chunk_collection_identifier: options[:collection_id]}) if options[:collection_id].present?
+          chunk_data.merge!({chunk_content_key: options[:content_key]}) if options[:content_key].present?
 
           case display_type
           when "span"
@@ -150,60 +146,30 @@ module Editmode
       end
 
       def chunk_display(label, identifier, options = {}, &block)
-        branch_id = params[:em_branch_id]
+        options[:branch_id] = params[:em_branch_id] if params[:em_branch_id].present?
         # This method should never show an error. 
         # If anything goes wrong fetching content
         # We should just show blank content, not
         # prevent the page from loading.
         begin
-          branch_params = branch_id.present? ? "branch_id=#{branch_id}" : ""
           field = options[:field].presence || ""          
-          cache_identifier = "chunk_#{identifier}#{branch_id}#{field}"
-          url = "#{api_root_url}/chunks/#{identifier}?project_id=#{Editmode.project_id}&#{branch_params}"
-          cached_content_present = Rails.cache.exist?(cache_identifier)
-          parent_identifier = identifier if field.present?
-          if !cached_content_present
-            response = HTTParty.get(url)
-            response_received = true if response.code == 200
-          end
 
-          if !cached_content_present && !response_received
-            raise "No response received"
+          chunk_value = Editmode::ChunkValue.new(identifier, options)
+          
+          if field.present? && chunk_value.chunk_type == 'collection_item'
+            chunk_content = chunk_value.field(field)
+            identifier = chunk_value.field_chunk(field)["identifier"]
+            chunk_type = chunk_value.field_chunk(field)["chunk_type"]
+            options[:collection_id] = chunk_value.collection_id
           else
-            if field.present? && response.present?
-              field_content = response["content"].detect {|f| f["custom_field_identifier"].downcase == field.downcase || f["custom_field_name"].downcase == field.downcase }
-              if field_content
-                content = field_content["content"]
-                type = field_content["chunk_type"]
-                identifier = Rails.cache.fetch("#{cache_identifier}_field_identifier") do
-                  field_content["identifier"]
-                end
-              end
-            end
-
-            variable_fallbacks = Rails.cache.fetch("#{cache_identifier}_variables") do
-              response['variable_fallbacks'].presence || {}
-            end
-
-            chunk_content = Rails.cache.fetch(cache_identifier) do  
-              content.presence || response["content"]
-            end
-
-            chunk_type = Rails.cache.fetch("#{cache_identifier}_type") do  
-              type.presence || response['chunk_type']
-            end
-
-            identifier = Rails.cache.fetch("#{cache_identifier}_field_identifier") do
-              identifier
-            end
-
-            options[:variable_fallbacks] = variable_fallbacks
-            options[:variable_values] = options[:variables].presence || {}
-            
-            options[:cache_identifier] =  parent_identifier.presence || identifier
-            
-            render_chunk_content(identifier,chunk_content,chunk_type, options)
+            chunk_content = chunk_value.content
+            chunk_type = chunk_value.chunk_type
+            identifier = chunk_value.response["identifier"] unless identifier.include? "cnk_"
           end
+
+          options[:cache_identifier] = chunk_value.identifier
+          options[:content_key] = chunk_value.response.try(:[], "content_key")
+          render_chunk_content(identifier, chunk_content, chunk_type, options)
 
         rescue => error
           # Show fallback content by default
@@ -230,28 +196,6 @@ module Editmode
         chunk_display('label', identifier, options, &block)
       end
       alias_method :E, :render_chunk
-
-
-      def variable_parse!(content, variables = {}, values = {}, raw = false)
-        tokens = content.scan(/\{{(.*?)\}}/)
-        if tokens.any?
-          tokens.flatten! 
-          tokens.each do |token|
-            token_value = values[token.to_sym] || variables[token] || ""
-            sanitized_value = ActionController::Base.helpers.sanitize(token_value)
-
-            unless raw
-              sanitized_value = content_tag("em-var", :data => {chunk_variable: token, chunk_variable_value: sanitized_value}) do
-                sanitized_value
-              end
-            end
-            
-            content.gsub!("{{#{token}}}", sanitized_value)
-          end
-        end
-
-        content
-      end
 
       def no_response_received(id = "")
         "Sorry, we can't find a chunk using this identifier: \"#{id}\". This can happen if you've deleted a chunk on editmode.com or if your local cache is out of date. If it persists, try running Rails.cache clear."
