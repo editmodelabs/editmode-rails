@@ -16,6 +16,7 @@ module Editmode
       @project_id = Editmode.project_id
       @variable_values = options[:variables].presence || {}
       @raw = options[:raw].present?
+      @skip_sanitize = options[:dangerously_skip_sanitization]
 
       @url = "#{api_root_url}/chunks/#{identifier}"
       @cache_identifier = set_cache_identifier(identifier)
@@ -35,7 +36,7 @@ module Editmode
           field_chunk = field_chunk(field)
           if field_chunk.present?
             result = field_chunk['content']
-            result = variable_parse!(result, variable_fallbacks, variable_values, @raw)
+            result = variable_parse!(result, variable_fallbacks, variable_values, @raw, @skip_sanitize)
           else
             raise no_response_received(field)
           end
@@ -57,7 +58,7 @@ module Editmode
     def content
       raise "undefined method 'content' for chunk_type: collection_item \nDid you mean? field" if chunk_type == 'collection_item'
 
-      result = variable_parse!(@content, variable_fallbacks, variable_values, @raw)
+      result = variable_parse!(@content, variable_fallbacks, variable_values, @raw, @skip_sanitize)
       result.try(:html_safe)
     end
 
@@ -79,8 +80,8 @@ module Editmode
       return false
     end
 
-    def variable_parse!(content, variables = {}, values = {}, raw = true)
-      content = ActionController::Base.helpers.sanitize(content)
+    def variable_parse!(content, variables = {}, values = {}, raw = true, skip_sanitize=false)
+      content = ActionController::Base.helpers.sanitize(content) unless skip_sanitize
       tokens = content.scan(/\{{(.*?)\}}/)
       if tokens.any?
         tokens.flatten!
