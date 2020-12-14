@@ -10,10 +10,10 @@ module Editmode
 
     attr_writer :content
 
-    def initialize(identifier, **options)
+    def initialize(identifier, project_id: Editmode.project_id, **options)
       @identifier = identifier
       @branch_id = options[:branch_id].presence
-      @project_id = Editmode.project_id
+      @project_id = project_id
       @variable_values = options[:variables].presence || {}
       @raw = options[:raw].present?
       @skip_sanitize = options[:dangerously_skip_sanitization]
