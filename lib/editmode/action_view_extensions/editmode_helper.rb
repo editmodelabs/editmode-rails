@@ -56,14 +56,14 @@ module Editmode
                 chunks.each do |chunk|
                   @custom_field_chunk = chunk
                   concat(content_tag(:div, class: "chunks-collection-item--wrapper #{item_class}") do
-                    yield
+                    yield(@custom_field_chunk)
                   end)
                 end
 
                 # Placeholder element for new collection item
                 @custom_field_chunk = chunks.first.merge!({placeholder: true})
                 concat(content_tag(:div, class: "chunks-hide chunks-col-placeholder-wrapper") do
-                  yield
+                  yield(@custom_field_chunk)
                 end)
               end 
             else
