@@ -50,6 +50,12 @@ Editmode provides helper methods for use in your rails views and controllers.
 <%= E('cnk_x4ts...', class: "a-css-class") %> # Render a chunk with inline css class 
 ```
 
+### Working with multiple projects in the same codebase
+If you want to include content from a different project to the one you've specified in the initializer, you can pass the project id in to the view helper.
+```erb
+<%= E("cnk_16e04a02d577afb610ce", project_id: "prj_02d577afb617hdb") %>
+```
+
 ### Content can also be accessed in Controllers
 ```ruby
 @page_title = e("cnk_x4ts............")  # Using a chunk identifier
@@ -77,6 +83,8 @@ e("cnk_16e04a02d577afb610ce", "Email Content", variables: variable_values)
 
 # Response: "Hi Dexter Morgan"
 ```
+
+
 
 ### Use collections for repeatable content
 ```erb
