@@ -17,6 +17,7 @@ module Editmode
       @variable_values = options[:variables].presence || {}
       @raw = options[:raw].present?
       @skip_sanitize = options[:dangerously_skip_sanitization]
+      @skip_cache = options[:skip_cache]
 
       @url = "#{api_root_url}/chunks/#{identifier}"
       @cache_identifier = set_cache_identifier(identifier)
@@ -81,7 +82,6 @@ module Editmode
     end
 
     def variable_parse!(content, variables = {}, values = {}, raw = true, skip_sanitize=false)
-      content = ActionController::Base.helpers.sanitize(content) unless skip_sanitize
       tokens = content.scan(/\{{(.*?)\}}/)
       if tokens.any?
         tokens.flatten!
@@ -99,10 +99,12 @@ module Editmode
         end
       end
 
-      content
+      content = ActionController::Base.helpers.sanitize(content) unless skip_sanitize
+      return content
     end
 
     def cached?
+      return false if @skip_cache
       Rails.cache.exist?(cache_identifier)
     end
 
@@ -114,6 +116,7 @@ module Editmode
     end
 
     def get_content
+
       if !cached?
         http_response = HTTParty.get(url, query: query_params)
         response_received = true if http_response.code == 200
@@ -122,9 +125,8 @@ module Editmode
       if !cached? && !response_received
         raise no_response_received(identifier)
       else
-        cached_response = Rails.cache.fetch(cache_identifier) do
-          http_response.to_json
-        end
+        Rails.cache.write(cache_identifier, http_response.to_json) if http_response.present?
+        cached_response = Rails.cache.fetch(cache_identifier)
 
         @response = json?(cached_response) ? JSON.parse(cached_response) : cached_response
         set_response_attributes!
