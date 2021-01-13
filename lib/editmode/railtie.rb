@@ -1,3 +1,4 @@
+require 'rails/railtie'
 module Editmode
   class Railtie < Rails::Railtie
     initializer "editmode" do |app|

@@ -1,10 +1,16 @@
 require 'editmode/helper'
+require 'action_view'
+require 'httparty'
 
 module Editmode
   module ActionViewExtensions
     module EditmodeHelper
-      require 'httparty'
+      include ::ActionView::Helpers::TagHelper
+      include ::ActionView::Helpers::TextHelper
+      include ::ActionView::Helpers::AssetTagHelper
+      include ::ActionView::Context
       include Editmode::Helper
+
 
       def api_version
         # Todo Add Header Version

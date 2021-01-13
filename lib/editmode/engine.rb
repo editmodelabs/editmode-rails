@@ -1,4 +1,5 @@
-require 'editmode/chunk_value'
+require 'rails/engine'
+require 'action_controller'
 require 'editmode/helper'
 
 module Editmode
