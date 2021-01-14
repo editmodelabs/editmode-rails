@@ -1,3 +1,6 @@
+require 'action_view'
+require 'active_support'
+
 module Editmode
   class ChunkValue
     include ActionView::Helpers::TagHelper
@@ -63,6 +66,11 @@ module Editmode
       result.try(:html_safe)
     end
 
+    def cached?
+      return false if @skip_cache
+      Rails.cache.exist?(cache_identifier)
+    end
+
     private
 
     # Todo: Transfer to helper utils
@@ -103,11 +111,6 @@ module Editmode
       return content
     end
 
-    def cached?
-      return false if @skip_cache
-      Rails.cache.exist?(cache_identifier)
-    end
-
     def query_params
       the_params = { 'project_id' => project_id }
       the_params['branch_id'] = branch_id if branch_id.present?
@@ -141,5 +144,8 @@ module Editmode
       @branch_id = response['branch_id']
     end
 
+    def no_response_received(id = "")
+      "Sorry, we can't find a chunk using this identifier: \"#{id}\". This can happen if you've deleted a chunk on editmode.com or if your local cache is out of date. If it persists, try running Rails.cache clear."
+    end
   end
 end
