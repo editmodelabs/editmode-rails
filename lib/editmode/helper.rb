@@ -12,7 +12,7 @@ module Editmode
           chunk.content
         end 
       rescue => er
-        puts er
+        Rails.logger.info "#{er}: We can't render content for #{identifier}"
       end
     end
 

@@ -126,7 +126,9 @@ module Editmode
       end
 
       if !cached? && !response_received
-        raise no_response_received(identifier)
+        message = http_response.try(:[], 'message') || no_response_received(identifier)
+
+        raise message
       else
         Rails.cache.write(cache_identifier, http_response.to_json) if http_response.present?
         cached_response = Rails.cache.fetch(cache_identifier)
