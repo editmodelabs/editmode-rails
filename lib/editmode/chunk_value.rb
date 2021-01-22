@@ -17,6 +17,7 @@ module Editmode
       @identifier = identifier
       @branch_id = options[:branch_id].presence
       @project_id = project_id
+      @referrer = options[:referrer].presence || ""
       @variable_values = options[:variables].presence || {}
       @raw = options[:raw].present?
       @skip_sanitize = options[:dangerously_skip_sanitization]
@@ -119,9 +120,8 @@ module Editmode
     end
 
     def get_content
-
       if !cached?
-        http_response = HTTParty.get(url, query: query_params)
+        http_response = HTTParty.get(url, query: query_params, headers: {referrer: @referrer})
         response_received = true if http_response.code == 200
       end
 

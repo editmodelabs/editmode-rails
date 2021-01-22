@@ -159,7 +159,7 @@ module Editmode
         # prevent the page from loading.
         begin
           field = options[:field].presence || ""          
-
+          options[:referrer] = request.url
           chunk_value = Editmode::ChunkValue.new(identifier, options)
           
           if field.present? && chunk_value.chunk_type == 'collection_item'
