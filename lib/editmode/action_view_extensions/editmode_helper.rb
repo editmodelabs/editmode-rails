@@ -16,6 +16,10 @@ module Editmode
         # Todo Add Header Version
       end
 
+      def allowed_tag_attributes
+        [:style, :href, :title, :src, :alt, :width, :height]
+      end
+
       def api_root_url
         ENV["EDITMODE_OVERRIDE_API_URL"] || "https://api.editmode.com"
       end
@@ -110,7 +114,7 @@ module Editmode
         end
       end
 
-      def render_chunk_content(chunk_identifier, chunk_content, chunk_type,options = {})
+      def render_chunk_content(chunk_identifier, chunk_content, chunk_type, options = {})
         begin 
           css_class = options[:class]
           cache_id = options[:cache_identifier]
@@ -132,17 +136,17 @@ module Editmode
           case display_type
           when "span"
             if chunk_type == "rich_text"
-              content = content_tag("em-span", :class => "editmode-richtext-editor #{css_class}", :data => chunk_data.merge!({:chunk_editable => true}) ) do
+              content = content_tag("em-span", :class => "editmode-richtext-editor #{css_class}", :data => chunk_data.merge!({:chunk_editable => true}), **options.slice(*allowed_tag_attributes) ) do
                 chunk_content.html_safe
               end
             else
-              content_tag("em-span", :class => css_class, :data => chunk_data.merge!({:chunk_editable => true}) ) do
+              content_tag("em-span", :class => css_class, :data => chunk_data.merge!({:chunk_editable => true}), **options.slice(*allowed_tag_attributes) ) do
                 chunk_content.html_safe
               end
             end
           when "image"
             chunk_content = chunk_content.blank? || chunk_content == "/images/original/missing.png" ? 'https://www.editmode.com/upload.png' : chunk_content
-            image_tag(chunk_content, :data => chunk_data, :class => css_class) 
+            image_tag(chunk_content, :data => chunk_data, :class => css_class, **options.slice(*allowed_tag_attributes)) 
           end
         rescue => errors
           puts errors
