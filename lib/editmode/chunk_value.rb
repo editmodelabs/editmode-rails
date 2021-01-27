@@ -73,6 +73,9 @@ module Editmode
     end
 
     private
+    def allowed_tag_attributes
+      %w(style href title src alt width height class target)
+    end
 
     # Todo: Transfer to helper utils
     def api_root_url
@@ -108,7 +111,7 @@ module Editmode
         end
       end
 
-      content = ActionController::Base.helpers.sanitize(content) unless skip_sanitize
+      content = ActionController::Base.helpers.sanitize(content, attributes: allowed_tag_attributes) unless skip_sanitize
       return content
     end
 
