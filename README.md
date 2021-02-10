@@ -107,6 +107,20 @@ e("cnk_16e04a02d577afb610ce", "Email Content", variables: variable_values)
 | item_class | string | `optional` Class name(s) that will be added along with "chunks-collection-item--wrapper" to all collection items |
 
 
+### Working with Image Transformation
+Use `transformation` attribute to perform real-time image transformations to deliver perfect images to the end-users.
+
+```ruby
+# This chunk should render an image with 200 x 200 dimension
+= E('id-of-some-image', transformation: "w-200 h-200")
+
+# For image inside a collection
+= c('some-collection-id') do
+  = F('Avatar', transformation: "w-200 h-200")
+```
+
+Please see complete list of [transformation parameters](https://editmode.com/docs#/imagekit_properties).
+
 ## Caching
 In order to keep your application speedy, Editmode minimizes the amount of network calls it makes by caching content where it can. 
 
