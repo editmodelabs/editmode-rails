@@ -9,7 +9,7 @@ module Editmode
     attr_accessor :identifier, :variable_values, :branch_id,
       :variable_fallbacks, :chunk_type, :project_id,
       :url, :collection_id, :cache_identifier,
-      :response
+      :response, :transformation
 
     attr_writer :content
 
@@ -22,6 +22,7 @@ module Editmode
       @raw = options[:raw].present?
       @skip_sanitize = options[:dangerously_skip_sanitization]
       @skip_cache = options[:skip_cache]
+      @transformation = options[:transformation]
 
       @url = "#{api_root_url}/chunks/#{identifier}"
       @cache_identifier = set_cache_identifier(identifier)
@@ -40,7 +41,7 @@ module Editmode
         if field.present?
           field_chunk = field_chunk(field)
           if field_chunk.present?
-            result = field_chunk['content']
+            result = field_chunk['chunk_type'] == 'image' ? set_transformation_properties!(field_chunk['content']) : field_chunk['content']
             result = variable_parse!(result, variable_fallbacks, variable_values, @raw, @skip_sanitize)
           else
             raise no_response_received(field)
@@ -73,6 +74,20 @@ module Editmode
     end
 
     private
+    def set_transformation_properties!(url)
+      if transformation.present? && url.present?
+        transformation.gsub!(" ", ",")
+        transformation.gsub!(/\s/, '')
+  
+        uri = URI(url)
+        uri.query = [uri.query, "tr=#{transformation}"].compact.join("&")
+        
+        url = uri.to_s
+      end
+
+      url
+    end
+
     def allowed_tag_attributes
       %w(style href title src alt width height class target)
     end
@@ -118,6 +133,7 @@ module Editmode
     def query_params
       the_params = { 'project_id' => project_id }
       the_params['branch_id'] = branch_id if branch_id.present?
+      the_params['transformation'] = @transformation if @transformation.present?
 
       the_params
     end
