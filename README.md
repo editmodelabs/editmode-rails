@@ -119,7 +119,7 @@ Use `transformation` attribute to perform real-time image transformations to del
   = F('Avatar', transformation: "w-200 h-200")
 ```
 
-Please see complete list of [transformation parameters](https://editmode.com/docs#/imagekit_properties).
+Please see the complete list of [transformation parameters](https://editmode.com/docs#/imagekit_properties).
 
 ## Caching
 In order to keep your application speedy, Editmode minimizes the amount of network calls it makes by caching content where it can. 
@@ -138,6 +138,8 @@ The editmode gem exposes a cache expiration endpoint in your application at `/ed
 - You can configure cache expiration webhooks in Editmode.com to ensure your application is notified when content changes happen on Editmode.com
 
 The cache expiration endpoint is currently **not** authenticated.
+
+?> We are using a method called `delete_matched` to purge your caches when a content gets updated, and this method isn't supported in `memcached`. We highly recommend using `redis_store` or `file_store`.
 
 ## Disabling editmode.js auto-include
 
