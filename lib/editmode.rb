@@ -8,10 +8,16 @@ require 'editmode/railtie' if defined? Rails
 require 'editmode/engine' if defined?(Rails)
 require 'editmode/monkey_patches'
 require 'editmode/logger'
+require 'editmode/chunk'
+
 module Editmode
   class << self
     include Editmode::ActionViewExtensions::EditmodeHelper
     include Editmode::Helper
+
+    def api_root_url
+      ENV["EDITMODE_OVERRIDE_API_URL"] || "https://api.editmode.com"
+    end
 
     def project_id=(id)
       config.project_id = id
@@ -52,11 +58,30 @@ module Editmode
         puts er
       end
     end
+
+    def cache_all!(chunks)
+      chunks.each do |chunk|
+        project_id = chunk["project_id"]
+        identifier = chunk["identifier"]
+        content_key = chunk["content_key"]
+        json_data = chunk.to_json
+        Rails.cache.write("chunk_#{project_id}#{identifier}", json_data)
+        Rails.cache.write("chunk_#{project_id}#{content_key}", json_data) if content_key.present?
+      end
+    end
   end
 
   class Configuration
     attr_accessor :access_token, :variable
-    attr_reader :project_id, :log_level
+    attr_reader :project_id, :log_level, :preload
+
+    def preload=(bool)
+      @preload = bool
+      if bool
+        chunks = Editmode::Chunk.retrieve
+        Editmode.cache_all!(chunks)
+      end
+    end
 
     def logger
       @logger ||= Editmode::Logger.new
@@ -64,6 +89,10 @@ module Editmode
 
     def project_id=(id)
       @project_id = id
+      if preload
+        chunks = Editmode::Chunk.retrieve(id)
+        Editmode.cache_all!(chunks)
+      end
     end
 
     def log_level=(level)

@@ -1,5 +1,11 @@
 Editmode.setup do |config|
-  # Replace TodoProjectId with your Editmode Project ID, 
-  # visit https://editmode.com/projects
   config.project_id = "<%= @project_id %>"
+
+  # Enables logging on every API request
+  # config.log_level = :silence
+
+  # Preload contents - this will take all the contents
+  # from the project specified in config.project_id
+  # and store it to your Application cache.
+  # config.preload = true
 end
