@@ -133,7 +133,6 @@ module Editmode
     def query_params
       the_params = { 'project_id' => project_id }
       the_params['branch_id'] = branch_id if branch_id.present?
-      the_params['transformation'] = @transformation if @transformation.present?
 
       the_params
     end
@@ -158,8 +157,9 @@ module Editmode
     end
 
     def set_response_attributes!
-      @content = response['content']
       @chunk_type = response['chunk_type']
+      
+      @content = @chunk_type == 'image' ? set_transformation_properties!(response['content']) : response['content'] 
       @variable_fallbacks = response['variable_fallbacks'].presence || {}
       @collection_id = response["collection"]["identifier"] if chunk_type == 'collection_item'
       @branch_id = response['branch_id']
