@@ -12,7 +12,11 @@ module Rails
     require 'active_support'
     require 'active_support/cache'
     require 'active_support/cache/file_store'
-    ::ActiveSupport::Cache::FileStore.new '/Users/jenvillaganas/work/edit_mode/editmode-rails/test/cache'
+    ::ActiveSupport::Cache::FileStore.new 'test/cache'
+  end
+
+  def self.logger
+    @logger = Logger.new(STDOUT)
   end
 end
 
@@ -23,20 +27,24 @@ module Editmode
       def params
         {}
       end
+
+      def request
+        {}
+      end
     end
   end
 end
 
 
 def setup!
-  Editmode.project_id = 'prj_5o66RFmQtg65'
+  Editmode.project_id = 'prj_N9qqt0bbHOQj'
 end
 
 setup!
 
 class TestEditmodeCache < Minitest::Test
   def setup
-    @chunk_id = 'cnk_9e3ec5e79344023912f5'
+    @chunk_id = 'cnk_5946670feecede242260'
   end
 
   def test_that_chunk_is_not_cached
@@ -48,6 +56,7 @@ class TestEditmodeCache < Minitest::Test
   def test_that_chunk_will_be_cached
     # This will send a request to api and cache the response
     chunk = Editmode.e @chunk_id
+    
     cache_id = "chunk_#{Editmode.project_id}#{@chunk_id}"
     assert_equal true, Rails.cache.exist?(cache_id)
   end
@@ -55,8 +64,9 @@ end
 
 class TestEditmodeHelper < Minitest::Test
   def setup
-    @chunk_id = 'cnk_9e3ec5e79344023912f5'
+    @chunk_id = 'cnk_5946670feecede242260'
     @cache_id = "chunk_#{Editmode.project_id}#{@chunk_id}"
+    Rails.cache.clear
   end
 
   def test_lower_case_e
@@ -67,7 +77,7 @@ class TestEditmodeHelper < Minitest::Test
   end
 
   def test_lower_case_e_with_collection_field
-    non_editable_chunk = Editmode.e 'cnk_ac445023d4be6fb6671a', 'Title'
+    non_editable_chunk = Editmode.e 'cnk_bd377bcf35c2e9c8af0c', 'Title'
 
     assert_equal true, non_editable_chunk.is_a?(String)
     assert_equal false, non_editable_chunk.include?('em-span')
@@ -104,7 +114,7 @@ class TestEditmodeHelper < Minitest::Test
   end
 
   def test_upper_case_e_with_collection_field
-    editable_chunk = Editmode.E 'cnk_ac445023d4be6fb6671a', 'Title'
+    editable_chunk = Editmode.E 'cnk_bd377bcf35c2e9c8af0c', 'Title'
     
     assert_equal true, editable_chunk.is_a?(String)
     assert_equal true, editable_chunk.include?('em-span')
@@ -117,7 +127,7 @@ class TestEditmodeHelper < Minitest::Test
     # The assign value should not match the response we're expecting  
     cache_dummy_content = "Dummy Content"
     cache_dummy_value = {
-      identifier: "cnk_9e3ec5e79344023912f5",
+      identifier: "cnk_5946670feecede242260",
       chunk_type: "single_line_text",
       project_id: "prj_5o66RFmQtg65",
       branch_id: "",
@@ -139,23 +149,23 @@ class TestEditmodeHelper < Minitest::Test
   end
 
   def test_editable_img_chunk
-    editable_chunk = Editmode.E('cnk_5278198a030418be2659')
+    editable_chunk = Editmode.E('cnk_28e14adbca13dbd16e3f')
 
-    assert_equal true, editable_chunk.include?('img')
+    assert_equal true, editable_chunk.include?('<img')
     assert_equal true, editable_chunk.include?('data-chunk-type="image"')
     assert_equal true, editable_chunk.include?('data-chunk-editable')
   end
 
   def test_non_editable_img_chunk
-    editable_chunk = Editmode.e('cnk_5278198a030418be2659')
+    editable_chunk = Editmode.e('cnk_28e14adbca13dbd16e3f')
 
-    assert_equal false, editable_chunk.include?('img')
+    assert_equal false, editable_chunk.include?('<img')
     assert_equal false, editable_chunk.include?('data-chunk-type="image"')
     assert_equal false, editable_chunk.include?('data-chunk-editable')
   end
 
   def test_collection
-    collection_id = 'col_mXYgqmmXlyC4'
+    collection_id = 'col_9YdHVSjGCNvU'
 
     collection_with_non_editable_fields = Editmode.c(collection_id) do 
       Editmode.f('Title')

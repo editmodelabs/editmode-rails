@@ -163,7 +163,7 @@ module Editmode
         # prevent the page from loading.
         begin
           field = options[:field].presence || ""          
-          options[:referrer] = request.url
+          options[:referrer] = request.present? && request.url || ""
           chunk_value = Editmode::ChunkValue.new(identifier, options)
           
           if field.present? && chunk_value.chunk_type == 'collection_item'
@@ -182,11 +182,12 @@ module Editmode
           render_chunk_content(identifier, chunk_content, chunk_type, options)
 
         rescue => error
+          puts error
           # Show fallback content by default
           return content_tag("em-span", &block) if block_given?
           # Otherwise show a span with no content to 
           # maintain layout
-          content_tag("em-span", "&nbsp".html_safe) 
+          content_tag("em-span", "&nbsp".html_safe)
         end
       end
       alias_method :chunk, :chunk_display

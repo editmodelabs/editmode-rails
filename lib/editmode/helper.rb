@@ -5,7 +5,7 @@ module Editmode
       field, options = parse_arguments(args)
       begin
         chunk = Editmode::ChunkValue.new(identifier, options.merge({raw: true}))
-
+        
         if chunk.chunk_type == 'collection_item'
           chunk.field(field)
         else
@@ -13,6 +13,7 @@ module Editmode
         end 
       rescue => er
         Rails.logger.info "#{er}: We can't render content for #{identifier}"
+        return ""
       end
     end
 
