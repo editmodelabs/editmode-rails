@@ -12,7 +12,7 @@ module Rails
     require 'active_support'
     require 'active_support/cache'
     require 'active_support/cache/file_store'
-    ::ActiveSupport::Cache::FileStore.new '/Users/jenvillaganas/work/edit_mode/editmode-rails/test/cache'
+    ::ActiveSupport::Cache::FileStore.new 'test/cache'
   end
 
   def self.logger
