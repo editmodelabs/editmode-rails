@@ -1,0 +1,44 @@
+name: Ruby Gem
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_version:
+        description: 'Target version: next [major|minor|patch|pre|release] or a given version number [x.x.x]'
+        required: true
+        default: 'patch'
+
+jobs:
+  release:
+    name: Build + Publish
+    runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, 'ci skip') && !contains(github.event.head_commit.message, 'skip ci')"
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Ruby 2.6
+      uses: actions/setup-ruby@v1
+      with:
+        ruby-version: 2.6.x
+    - name: Setup git user
+      run: |
+        git config --global user.email "jen@editmode.com"
+        git config --global user.name "Jen Villaganas"
+        
+    - name: Tag repository
+      run: |
+        bundle exec gem install gem-release
+        bundle exec gem bump -c -p -t -v ${{ github.event.inputs.target_version }}
+
+    - name: Publish to RubyGems
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GEM_HOST_API_KEY: "${{secrets.RUBYGEMS_AUTH_TOKEN}}"
+        OWNER: ${{ github.repository_owner }}
+      run: |
+        mkdir -p $HOME/.gem
+        touch $HOME/.gem/credentials
+        chmod 0600 $HOME/.gem/credentials
+        printf -- "---\n:rubygems_api_key: ${GEM_HOST_API_KEY}\n" > $HOME/.gem/credentials
+        bundle exec gem release
+
