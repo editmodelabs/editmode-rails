@@ -17,8 +17,9 @@ jobs:
       uses: actions/setup-ruby@v1
       with:
         ruby-version: 2.6.x
+    - name: Setup Github Config
+      run: |
+        git config --global user.email "jen@editmode.com"
         
     - name: Publish to Rubygems
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       uses: cadwallion/publish-rubygems-action@v1.0.0
