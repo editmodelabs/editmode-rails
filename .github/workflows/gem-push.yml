@@ -19,4 +19,6 @@ jobs:
         ruby-version: 2.6.x
         
     - name: Publish to Rubygems
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       uses: cadwallion/publish-rubygems-action@v1.0.0
