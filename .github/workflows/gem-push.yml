@@ -1,15 +1,12 @@
 name: Ruby Gem
 
-on:
-  push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
+on: [push]
 
 jobs:
-  build:
+  release:
     name: Build + Publish
     runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, 'ci skip') && !contains(github.event.head_commit.message, 'skip ci')"
 
     steps:
     - uses: actions/checkout@v2
@@ -17,9 +14,15 @@ jobs:
       uses: actions/setup-ruby@v1
       with:
         ruby-version: 2.6.x
-    - name: Setup Github Config
+
+    - name: Publish to RubyGems
       run: |
-        git config --global user.email "jen@editmode.com"
-        
-    - name: Publish to Rubygems
-      uses: cadwallion/publish-rubygems-action@v1.0.0
+        mkdir -p $HOME/.gem
+        touch $HOME/.gem/credentials
+        chmod 0600 $HOME/.gem/credentials
+        gem install gem-release
+        gem bump patch
+        gem build *.gemspec
+        gem push *.gem
+      env:
+        GEM_HOST_API_KEY: "${{secrets.RUBYGEMS_AUTH_TOKEN}}"
