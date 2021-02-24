@@ -22,7 +22,7 @@ jobs:
         ruby-version: 2.6.x
     - name: Setup git user
       run: |
-        git config --global user.email "jen@editmode.com"
+        git config --global user.email "jengkarlong@gmail.com"
         git config --global user.name "Jen Villaganas"
         
     - name: Tag repository
