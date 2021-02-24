@@ -139,19 +139,22 @@ module Editmode
 
     def get_content
       if !cached?
-        http_response = HTTParty.get(url, query: query_params, headers: {referrer: @referrer})
-        response_received = true if http_response.code == 200
+        @response = HTTParty.get(url, query: query_params, headers: {referrer: @referrer})
+        response_received = true if @response.code == 200
       end
 
       if !cached? && !response_received
-        message = http_response.try(:[], 'message') || no_response_received(identifier)
+        message = @response.try(:[], 'message') || no_response_received(identifier)
 
         raise message
       else
-        Rails.cache.write(cache_identifier, http_response.to_json) if http_response.present?
+        Rails.cache.write(cache_identifier, @response.to_json) if @response.present?
         cached_response = Rails.cache.fetch(cache_identifier)
 
-        @response = json?(cached_response) ? JSON.parse(cached_response) : cached_response
+        if cached_response.present?
+          @response = json?(cached_response) ? JSON.parse(cached_response) : cached_response
+        end
+
         set_response_attributes!
       end
     end
