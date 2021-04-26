@@ -63,10 +63,10 @@ module Editmode
 
             if chunks.any?
               content_tag :div, class: "chunks-collection-wrapper #{parent_class}", data: {chunk_collection_identifier: collection_identifier} do
-                chunks.each do |chunk|
+                chunks.each_with_index do |chunk, index|
                   @custom_field_chunk = chunk
                   concat(content_tag(:div, class: "chunks-collection-item--wrapper #{item_class}") do
-                    yield(@custom_field_chunk)
+                    yield(@custom_field_chunk, index)
                   end)
                 end
 
