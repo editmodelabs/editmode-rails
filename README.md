@@ -33,6 +33,11 @@ end
 That's it, you're all set up. By default Editmode will now include editmode.js in every page of your rails application, unless you disable auto-include.
 <hr/>
 
+#### 3. (Rails 6) Ensuring the Magic Editor works with Content Security Policy
+
+- Add "https://static.editmode.com" to `style_src` and `script_src` in your content security policy.
+- Add "https://api.editmode.com" to `connect_src` in your content security policy.
+
 ## Rendering Content
 
 Editmode provides helper methods for use in your rails views and controllers.
