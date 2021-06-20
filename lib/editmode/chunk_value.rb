@@ -94,7 +94,7 @@ module Editmode
 
     # Todo: Transfer to helper utils
     def api_root_url
-      ENV["EDITMODE_OVERRIDE_API_URL"] || "https://api2.editmode.com"
+      ENV["EDITMODE_OVERRIDE_API_URL"] || "https://api.editmode.com"
     end
 
     def set_cache_identifier(id)
@@ -131,15 +131,15 @@ module Editmode
     end
 
     def query_params
-      p = { project_id: project_id }
-      p[:branch_id] = branch_id if branch_id.present?
-      p[:referrer] = @referrer if @referrer.present?
-      p
+      the_params = { 'project_id' => project_id }
+      the_params['branch_id'] = branch_id if branch_id.present?
+
+      the_params
     end
 
     def get_content
       if !cached?
-        @response = HTTParty.get(url, query: query_params)
+        @response = HTTParty.get(url, query: query_params, headers: {referrer: @referrer})
         response_received = true if @response.code == 200
       end
 
