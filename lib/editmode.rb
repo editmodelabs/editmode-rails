@@ -16,7 +16,7 @@ module Editmode
     include Editmode::Helper
 
     def api_root_url
-      ENV["EDITMODE_OVERRIDE_API_URL"] || "https://api.editmode.com"
+      ENV["EDITMODE_OVERRIDE_API_URL"] || "https://api2.editmode.com"
     end
 
     def project_id=(id)
