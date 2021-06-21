@@ -38,7 +38,8 @@ module Editmode
             :collection_identifier => collection_identifier,
             :branch_id => branch_id,
             :limit => limit,
-            :tags => tags
+            :tags => tags,
+            :project_id => Editmode.project_id
           }.to_query
 
           url = URI(api_root_url)
