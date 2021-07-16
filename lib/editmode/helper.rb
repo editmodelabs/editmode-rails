@@ -4,7 +4,7 @@ module Editmode
     def e(identifier, *args)
       field, options = parse_arguments(args)
       begin
-        chunk = Editmode::ChunkValue.new(identifier, options.merge({raw: true}))
+        chunk = Editmode::ChunkValue.new(identifier, **options.merge({raw: true}))
         
         if chunk.chunk_type == 'collection_item'
           chunk.field(field)
