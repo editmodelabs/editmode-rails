@@ -91,7 +91,7 @@ module Editmode
       def chunk_field_value(parent_chunk_object, custom_field_identifier, options = {})
         begin 
           chunk_identifier = parent_chunk_object["identifier"]
-          chunk_value = Editmode::ChunkValue.new(parent_chunk_object["identifier"], options.merge({response: parent_chunk_object}))
+          chunk_value = Editmode::ChunkValue.new(parent_chunk_object["identifier"], **options.merge({response: parent_chunk_object}))
           custom_field_item = chunk_value.field_chunk(custom_field_identifier)
 
           options[:field] = custom_field_identifier
@@ -165,7 +165,7 @@ module Editmode
         begin
           field = options[:field].presence || ""          
           options[:referrer] = request.present? && request.url || ""
-          chunk_value = Editmode::ChunkValue.new(identifier, options)
+          chunk_value = Editmode::ChunkValue.new(identifier, **options)
           
           if field.present? && chunk_value.chunk_type == 'collection_item'
             chunk_content = chunk_value.field(field)
