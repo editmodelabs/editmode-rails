@@ -63,7 +63,7 @@ module Editmode
             end
 
             if chunks.any?
-              content_tag :div, class: "chunks-collection-wrapper #{parent_class}", data: {chunk_collection_identifier: collection_identifier} do
+              content_tag :div, class: "chunks-collection-wrapper #{parent_class}", data: {chunk_collection_identifier: collection_identifier, chunk_tags: tags.join("|")} do
                 chunks.each_with_index do |chunk, index|
                   @custom_field_chunk = chunk
                   concat(content_tag(:div, class: "chunks-collection-item--wrapper #{item_class}") do
@@ -73,7 +73,7 @@ module Editmode
 
                 # Placeholder element for new collection item
                 @custom_field_chunk = chunks.first.merge!({placeholder: true})
-                concat(content_tag(:div, class: "chunks-hide chunks-col-placeholder-wrapper") do
+                concat(content_tag(:template, class: "chunks-hide chunks-col-placeholder-wrapper") do
                   yield(@custom_field_chunk)
                 end)
               end 
