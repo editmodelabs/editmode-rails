@@ -75,7 +75,7 @@ module Editmode
                 
                 # Placeholder element for new collection item
                 @custom_field_chunk = chunks.first.merge!({placeholder: true})
-                concat(content_tag("em-template", class: "chunks-col-placeholder-wrapper") do
+                concat(content_tag("em-template", class: "chunks-col-placeholder-wrapper", style: "display: none") do
                   yield(@custom_field_chunk, 0)
                 end)
               end 
