@@ -43,7 +43,7 @@ module Editmode
     end
 
     def script_url 
-      ENV["EDITMODE_OVERRIDE_SCRIPT_URL"] || "https://unpkg.com/editmode-magic-editor@^0/dist/magic-editor.js"
+      ENV["EDITMODE_OVERRIDE_SCRIPT_URL"] || "https://unpkg.com/editmode-magic-editor@~1/dist/magic-editor.js"
     end
 
   end
