@@ -63,27 +63,29 @@ module Editmode
             end
 
             if chunks.any?
-              content_tag :div, class: "chunks-collection-wrapper #{parent_class}", data: {chunk_collection_identifier: collection_identifier} do
+              return content_tag :div, class: "chunks-collection-wrapper #{parent_class}", data: {chunk_collection_identifier: collection_identifier, chunk_tags: tags.join("|")} do
                 chunks.each_with_index do |chunk, index|
                   @custom_field_chunk = chunk
-                  concat(content_tag(:div, class: "chunks-collection-item--wrapper #{item_class}") do
-                    yield(@custom_field_chunk, index)
-                  end)
+                  concat(
+                    content_tag(:div, class: "chunks-collection-item--wrapper #{item_class}") do
+                      yield(@custom_field_chunk, index)
+                    end
+                  )
                 end
-
+                
                 # Placeholder element for new collection item
                 @custom_field_chunk = chunks.first.merge!({placeholder: true})
-                concat(content_tag(:div, class: "chunks-hide chunks-col-placeholder-wrapper") do
-                  yield(@custom_field_chunk)
+                concat(content_tag("em-template", class: "chunks-col-placeholder-wrapper", style: "display: none") do
+                  yield(@custom_field_chunk, 0)
                 end)
               end 
             else
-              content_tag(:span, "&nbsp".html_safe)
+              return content_tag(:span, "&nbsp".html_safe)
             end
           end
         rescue => error
           puts error 
-          return []
+          return ""
         end
       end
       alias_method :c, :chunk_collection
@@ -198,7 +200,7 @@ module Editmode
         options[:variable_fallbacks] = @custom_field_chunk["variable_fallbacks"] || {}
         options[:variable_values] = options[:variables] || {}
         
-        chunk_field_value(@custom_field_chunk, field_name, options)
+        chunk_field_value(@custom_field_chunk, field_name, **options)
       end
       alias_method :F, :render_custom_field
 
